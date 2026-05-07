@@ -1,4 +1,3 @@
-
 // houses.js — Grand Life — Будинки
 
 const ITEMS_PER_PAGE = 9;
@@ -125,7 +124,7 @@ function renderSelectedLocations() {
 
 // ── ДАНІ ──
 function getAllHouses() {
-  return window._grandLifeProps || [];
+  return (window._grandLifeProps || []).filter(p => (p.type||'').toLowerCase().includes('будинок'));
 }
 
 function parsePrice(str) { return parseInt((str||"").toString().replace(/[^\d]/g,""))||0; }
