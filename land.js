@@ -1,4 +1,3 @@
-
 // land.js — Grand Life — Ділянки
 
 const ITEMS_PER_PAGE = 9;
@@ -110,7 +109,7 @@ function renderSelectedLocations() {
 
 // ── ДАНІ ──
 function getAll_Land() {
-  return window._grandLifeProps || [];
+  return (window._grandLifeProps || []).filter(p => (p.type||'').toLowerCase().includes('ділянка'));
 }
 
 function parsePrice(str) { return parseInt((str||"").toString().replace(/[^\d]/g,""))||0; }
