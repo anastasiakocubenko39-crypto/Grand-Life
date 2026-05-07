@@ -1,4 +1,3 @@
-
 // rent.js — Grand Life — Оренда
 
 const ITEMS_PER_PAGE = 9;
@@ -125,7 +124,7 @@ function renderSelectedLocations() {
 
 // ── ДАНІ ──
 function getAll_Rent() {
-  return window._grandLifeProps || [];
+  return (window._grandLifeProps || []).filter(p => (p.type||'').toLowerCase().includes('оренда'));
 }
 
 function parsePrice(str) { return parseInt((str||"").toString().replace(/[^\d]/g,""))||0; }
