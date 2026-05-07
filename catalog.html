@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Всі об'єкти — Grand Life</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="catalog.css"/>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo" onclick="location.href='index.html'">
+    <img src="logo.png.png" alt="Grand Life">
+    <span class="logo-text">Grand <em>Life</em></span>
+  </div>
+  <nav class="desktop-nav">
+    <a href="index.html">Головна</a>
+    <a href="catalog.html" style="color:var(--gold)">Об'єкти</a>
+    <a href="about.html">Про нас</a>
+    <a href="index.html#contacts">Контакти</a>
+  </nav>
+  <button class="burger" id="burgerBtn"><span></span><span></span><span></span></button>
+</header>
+
+<div class="menu-overlay" id="menuOverlay"></div>
+<nav class="side-menu" id="sideMenu">
+  <button class="close-menu" id="closeMenu">×</button>
+  <div class="side-menu-links">
+    <a href="index.html"><span class="link-num">01</span>Головна</a>
+    <a href="catalog.html"><span class="link-num">02</span>Об'єкти</a>
+    <a href="about.html"><span class="link-num">03</span>Про нас</a>
+    <a href="index.html#contacts"><span class="link-num">04</span>Контакти</a>
+  </div>
+  <div class="side-menu-footer">
+    <p>📍 Київ та область</p>
+    <p>📞 <a href="tel:+380000000000">+38 000 000 00 00</a></p>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="page-hero-inner">
+    <div class="section-tag" style="display:inline-block;margin-bottom:12px">Каталог</div>
+    <h1>Всі <em>об'єкти</em></h1>
+    <p>Будинки, квартири, ділянки та оренда — все в одному місці</p>
+  </div>
+</section>
+
+<div class="cat-tabs-bar">
+  <div class="cat-tabs-inner">
+    <button class="cat-tab-btn active" onclick="setCategory('all')" id="tab-all">
+      🏠 Всі <span class="cat-tab-count" id="cnt-all">0</span>
+    </button>
+    <button class="cat-tab-btn" onclick="setCategory('будинок')" id="tab-будинок">
+      🏡 Будинки <span class="cat-tab-count" id="cnt-будинок">0</span>
+    </button>
+    <button class="cat-tab-btn" onclick="setCategory('квартира')" id="tab-квартира">
+      🏢 Квартири <span class="cat-tab-count" id="cnt-квартира">0</span>
+    </button>
+    <button class="cat-tab-btn" onclick="setCategory('ділянка')" id="tab-ділянка">
+      🌳 Ділянки <span class="cat-tab-count" id="cnt-ділянка">0</span>
+    </button>
+    <button class="cat-tab-btn" onclick="setCategory('оренда')" id="tab-оренда">
+      🔑 Оренда <span class="cat-tab-count" id="cnt-оренда">0</span>
+    </button>
+  </div>
+</div>
+
+<div class="search-bar">
+  <div class="search-bar-inner">
+    <div class="search-main">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="mainSearch" placeholder="Пошук за назвою, містом, описом..." oninput="applyFilters()">
+    </div>
+    <div class="search-filters">
+      <input type="text" class="sf-input" id="locSearch" placeholder="📍 Місто..." oninput="applyFilters()" style="width:150px">
+      <span class="sf-label">Ціна $</span>
+      <input type="number" class="sf-input" id="priceMin" placeholder="Від" min="0">
+      <input type="number" class="sf-input" id="priceMax" placeholder="До" min="0">
+      <span class="sf-label">Площа від</span>
+      <input type="number" class="sf-input" id="areaMin" placeholder="м²" min="0">
+      <select class="sf-select" id="sortSelect" onchange="applyFilters()">
+        <option value="newest">Новіші</option>
+        <option value="price_asc">Ціна ↑</option>
+        <option value="price_desc">Ціна ↓</option>
+        <option value="area_asc">Площа ↑</option>
+        <option value="area_desc">Площа ↓</option>
+      </select>
+    </div>
+    <div class="search-results-info">Знайдено: <span id="countDisplay">0</span></div>
+  </div>
+</div>
+
+<div class="catalog-page">
+  <div class="sort-row">
+    <div class="view-toggle">
+      <button class="view-btn active" id="viewGrid" onclick="setView('grid')" title="Сітка">⊞</button>
+      <button class="view-btn" id="viewList" onclick="setView('list')" title="Список">☰</button>
+    </div>
+  </div>
+  <div class="houses-grid" id="housesGrid"></div>
+  <div class="pagination" id="pagination"></div>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="logo" onclick="location.href='index.html'">
+      <img src="logo.png.png" alt="Grand Life">
+      <span class="logo-text">Grand <em>Life</em></span>
+    </div>
+    <p class="footer-copy">© 2025 Grand Life. Всі права захищені.</p>
+    <div class="footer-links">
+      <a href="index.html">Головна</a>
+      <a href="catalog.html">Об'єкти</a>
+      <a href="about.html">Про нас</a>
+      <a href="index.html#contacts">Контакти</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script src="catalog.js"></script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Адмін панель — Grand Life</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="admin.css"/>
+</head>
+<body class="admin-body">
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="logo.png.png" alt="Grand Life">
+      <span class="logo-text">Grand <em>Life</em></span>
+    </div>
+    <h2>Адмін панель</h2>
+    <p class="login-subtitle">Введіть дані для входу</p>
+    <input type="text" id="loginInput" placeholder="Логін" autocomplete="off">
+    <input type="password" id="passInput" placeholder="Пароль">
+    <button id="loginBtn" class="admin-btn-main">Увійти →</button>
+    <p id="loginError" class="login-error"></p>
+  </div>
+</div>
+
+<!-- VERIFY PAGE -->
+<div id="verifyPage" class="login-page hidden">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="logo.png.png" alt="Grand Life">
+      <span class="logo-text">Grand <em>Life</em></span>
+    </div>
+    <h2>Підтвердження</h2>
+    <p class="login-subtitle" id="verifyHint">Код надіслано на пошту адміністратора</p>
+    <input type="text" id="codeInput" placeholder="6-значний код" maxlength="6" autocomplete="off">
+    <button id="verifyBtn" class="admin-btn-main">Підтвердити ✓</button>
+    <button id="resendBtn" class="admin-btn-ghost">↺ Надіслати ще раз</button>
+    <p id="verifyError" class="login-error"></p>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPage" class="hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <img src="logo.png.png" alt="Grand Life">
+      <span class="logo-text">Grand <em>Life</em></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="sidebar-btn active" onclick="showTab('add')" id="nav-add">
+        <span>➕</span> Додати об'єкт
+      </button>
+      <button class="sidebar-btn" onclick="showTab('list')" id="nav-list">
+        <span>📋</span> Всі об'єкти
+        <span class="sidebar-count" id="sidebarCount">0</span>
+      </button>
+      <button class="sidebar-btn" onclick="showTab('stats')" id="nav-stats">
+        <span>📊</span> Статистика
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="index.html" class="sidebar-link">← На сайт</a>
+      <button onclick="logout()" class="sidebar-logout">Вийти</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+
+    <!-- МОБІЛЬНИЙ ХЕДЕР -->
+    <div class="admin-mobile-header">
+      <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+      <span class="logo-text" style="font-size:18px">Grand <em>Life</em></span>
+      <button onclick="logout()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:13px">Вийти</button>
+    </div>
+
+    <!-- ТАБ: ДОДАТИ ОБ'ЄКТ -->
+    <div id="tab-add" class="admin-tab">
+      <div class="tab-header">
+        <h1>Додати <em>об'єкт</em></h1>
+        <p>Заповніть форму — об'єкт автоматично з'явиться у відповідному розділі</p>
+      </div>
+
+      <div class="add-form">
+
+        <!-- ТИП -->
+        <div class="form-group">
+          <label>Тип об'єкта *</label>
+          <div class="type-selector">
+            <button class="type-btn" onclick="selectType('Будинок')" id="type-Будинок">
+              🏡 Будинок
+            </button>
+            <button class="type-btn" onclick="selectType('Квартира')" id="type-Квартира">
+              🏢 Квартира
+            </button>
+            <button class="type-btn" onclick="selectType('Ділянка')" id="type-Ділянка">
+              🌳 Ділянка
+            </button>
+            <button class="type-btn" onclick="selectType('Оренда')" id="type-Оренда">
+              🔑 Оренда
+            </button>
+          </div>
+          <input type="hidden" id="selectedType">
+          <p class="type-hint" id="typeHint">Оберіть тип — об'єкт потрапить у відповідний розділ</p>
+        </div>
+
+        <!-- НАЗВА -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Назва об'єкта *</label>
+            <input type="text" id="f-title" placeholder="Напр: Затишний будинок в Ірпені">
+          </div>
+          <div class="form-group">
+            <label>Локація *</label>
+            <input type="text" id="f-location" placeholder="Напр: Ірпінь, вул. Лісова 12">
+          </div>
+        </div>
+
+        <!-- ЦІНА І ПЛОЩА -->
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ціна</label>
+            <div class="price-input-wrap">
+              <input type="text" id="f-price" placeholder="Напр: 85 000">
+              <select id="f-currency" class="currency-sel">
+                <option value="$">$ USD</option>
+                <option value="€">€ EUR</option>
+                <option value="₴">₴ UAH</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Площа</label>
+            <div class="price-input-wrap">
+              <input type="text" id="f-area" placeholder="Напр: 120">
+              <select id="f-area-unit" class="currency-sel">
+                <option value="м²">м²</option>
+                <option value="соток">соток</option>
+                <option value="га">га</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" id="roomsGroup">
+            <label>Кімнати</label>
+            <input type="text" id="f-rooms" placeholder="Напр: 3 кімнати">
+          </div>
+        </div>
+
+        <!-- ФОТО -->
+        <div class="form-group">
+          <label>Фото / Відео</label>
+          <div class="media-upload-area" id="mediaArea" onclick="document.getElementById('fileInput').click()">
+            <div class="media-upload-hint">
+              <span class="upload-icon">📸</span>
+              <p>Натисніть або перетягніть фото/відео сюди</p>
+              <small>JPG, PNG, WEBP, MP4 — до 50 МБ</small>
+            </div>
+            <div class="media-preview" id="mediaPreview"></div>
+          </div>
+          <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none" onchange="handleFiles(this.files)">
+
+          <div class="form-divider">
+            <span>або вставте посилання</span>
+          </div>
+
+          <input type="text" id="f-image-url" placeholder="https://... (посилання на фото або відео)">
+        </div>
+
+        <!-- ОПИС -->
+        <div class="form-group">
+          <label>Опис</label>
+          <textarea id="f-description" placeholder="Детальний опис об'єкта: стан, особливості, інфраструктура..."></textarea>
+        </div>
+
+        <!-- КНОПКА -->
+        <div class="form-actions">
+          <button onclick="addProperty()" class="admin-btn-main big">
+            ✅ Додати об'єкт
+          </button>
+          <button onclick="clearForm()" class="admin-btn-ghost">
+            Очистити форму
+          </button>
+        </div>
+
+        <div id="addSuccess" class="success-msg hidden">
+          ✅ Об'єкт успішно додано!
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ТАБ: СПИСОК -->
+    <div id="tab-list" class="admin-tab hidden">
+      <div class="tab-header">
+        <h1>Всі <em>об'єкти</em></h1>
+        <p>Керуйте переліком об'єктів нерухомості</p>
+      </div>
+
+      <!-- ФІЛЬТР СПИСКУ -->
+      <div class="list-filters">
+        <button class="lf-btn active" onclick="filterList('all')" id="lf-all">Всі</button>
+        <button class="lf-btn" onclick="filterList('Будинок')" id="lf-Будинок">🏡 Будинки</button>
+        <button class="lf-btn" onclick="filterList('Квартира')" id="lf-Квартира">🏢 Квартири</button>
+        <button class="lf-btn" onclick="filterList('Ділянка')" id="lf-Ділянка">🌳 Ділянки</button>
+        <button class="lf-btn" onclick="filterList('Оренда')" id="lf-Оренда">🔑 Оренда</button>
+        <input type="text" id="listSearch" placeholder="🔍 Пошук..." class="list-search" oninput="renderList()">
+      </div>
+
+      <div id="adminList" class="admin-list"></div>
+    </div>
+
+    <!-- ТАБ: СТАТИСТИКА -->
+    <div id="tab-stats" class="admin-tab hidden">
+      <div class="tab-header">
+        <h1><em>Статистика</em></h1>
+        <p>Огляд об'єктів за категоріями</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🏠</div>
+          <div class="stat-info">
+            <span class="stat-big" id="stat-all">0</span>
+            <span class="stat-name">Всього об'єктів</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏡</div>
+          <div class="stat-info">
+            <span class="stat-big" id="stat-house">0</span>
+            <span class="stat-name">Будинків</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-info">
+            <span class="stat-big" id="stat-apt">0</span>
+            <span class="stat-name">Квартир</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🌳</div>
+          <div class="stat-info">
+            <span class="stat-big" id="stat-land">0</span>
+            <span class="stat-name">Ділянок</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🔑</div>
+          <div class="stat-info">
+            <span class="stat-big" id="stat-rent">0</span>
+            <span class="stat-name">Оренда</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-list-preview">
+        <h3>Останні додані</h3>
+        <div id="recentList"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

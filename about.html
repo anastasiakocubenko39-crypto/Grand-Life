@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Про нас — Grand Life</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="about.css"/>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo" onclick="location.href='index.html'">
+    <img src="logo.png.png" alt="Grand Life">
+    <span class="logo-text">Grand <em>Life</em></span>
+  </div>
+  <nav class="desktop-nav">
+    <a href="index.html">Головна</a>
+    <a href="catalog.html">Об'єкти</a>
+    <a href="about.html" style="color:var(--gold)">Про нас</a>
+    <a href="index.html#contacts">Контакти</a>
+  </nav>
+  <button class="burger" id="burgerBtn"><span></span><span></span><span></span></button>
+</header>
+
+<div class="menu-overlay" id="menuOverlay"></div>
+<nav class="side-menu" id="sideMenu">
+  <button class="close-menu" id="closeMenu">×</button>
+  <div class="side-menu-links">
+    <a href="index.html"><span class="link-num">01</span>Головна</a>
+    <a href="catalog.html"><span class="link-num">02</span>Об'єкти</a>
+    <a href="about.html"><span class="link-num">03</span>Про нас</a>
+    <a href="index.html#contacts"><span class="link-num">04</span>Контакти</a>
+  </div>
+  <div class="side-menu-footer">
+    <p>📍 Київ та область</p>
+    <p>📞 <a href="tel:+380000000000">+38 000 000 00 00</a></p>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="about-hero">
+  <div class="about-hero-inner">
+    <div class="about-hero-text">
+      <div class="section-tag">Про компанію</div>
+      <h1>Grand <em>Life</em></h1>
+      <p class="about-subtitle">Агентство нерухомості з досвідом та репутацією</p>
+      <div class="about-founded">
+        <span class="founded-year">2017</span>
+        <span class="founded-label">рік заснування</span>
+      </div>
+    </div>
+    <div class="about-hero-img">
+      <img src="hero.png" alt="Grand Life нерухомість"
+           onerror="this.src='hero.jpg'"
+           class="about-main-photo">
+      <div class="about-img-badge">
+        <span>8</span>
+        <small>років<br>на ринку</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="about-stats">
+  <div class="about-stats-inner">
+    <div class="astat">
+      <span class="astat-num">120+</span>
+      <span class="astat-label">Об'єктів продано</span>
+    </div>
+    <div class="astat-div"></div>
+    <div class="astat">
+      <span class="astat-num">8</span>
+      <span class="astat-label">Років досвіду</span>
+    </div>
+    <div class="astat-div"></div>
+    <div class="astat">
+      <span class="astat-num">98%</span>
+      <span class="astat-label">Задоволених клієнтів</span>
+    </div>
+    <div class="astat-div"></div>
+    <div class="astat">
+      <span class="astat-num">50+</span>
+      <span class="astat-label">Партнерів</span>
+    </div>
+  </div>
+</section>
+
+<!-- ПРО КОМПАНІЮ -->
+<section class="about-section">
+  <div class="about-section-inner">
+    <div class="about-text-block">
+      <div class="section-tag">Наша історія</div>
+      <h2>Хто ми<br><em>такі</em></h2>
+      <p>
+        Grand Life — агентство нерухомості, засноване у 2017 році.
+        За 8 років роботи ми допомогли сотням сімей знайти свій дім,
+        вигідно продати або орендувати нерухомість у Києві та Київській області.
+      </p>
+      <p>
+        Ми працюємо з квартирами, будинками, земельними ділянками
+        та комерційною нерухомістю. Кожен клієнт отримує індивідуальний
+        підхід та повний юридичний супровід угоди.
+      </p>
+
+      <div class="about-address">
+        <div class="address-icon">📍</div>
+        <div>
+          <strong>Юридична адреса</strong>
+          <p><!-- ДОДАЙТЕ АДРЕСУ ТУТ --><span class="placeholder-text">[Вкажіть юридичну адресу]</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-values">
+      <div class="value-card">
+        <div class="value-icon">🤝</div>
+        <h4>Чесність</h4>
+        <p>Прозорі умови співпраці без прихованих комісій та зборів.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">⚡</div>
+        <h4>Швидкість</h4>
+        <p>Середній час продажу об'єкта — 3 тижні завдяки широкій базі покупців.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">📋</div>
+        <h4>Юридична чистота</h4>
+        <p>Повна перевірка документів та супровід угоди від початку до кінця.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🏆</div>
+        <h4>Досвід</h4>
+        <p>8 років на ринку нерухомості Київщини. Знаємо ринок зсередини.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- КОМАНДА -->
+<section class="team-section">
+  <div class="team-inner">
+    <div class="section-tag" style="text-align:center">Команда</div>
+    <h2 style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,52px);font-weight:700;margin-bottom:48px">
+      Люди, яким<br><em style="color:var(--gold);font-style:italic">можна довіряти</em>
+    </h2>
+
+    <div class="team-grid">
+      <!-- КЕРІВНИК — ДОДАЙТЕ ФОТО ТА ІМ'Я -->
+      <div class="team-card team-card-main">
+        <div class="team-photo">
+          <img src="<!-- ФОТО КЕРІВНИКА -->"
+               alt="Керівник"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+          <div class="team-photo-placeholder">
+            <span>👤</span>
+            <small>Додайте фото</small>
+          </div>
+        </div>
+        <div class="team-info">
+          <h3><!-- ІМ'Я КЕРІВНИКА --><span class="placeholder-text">[Ім'я та прізвище]</span></h3>
+          <span class="team-role">Засновник та керівник</span>
+          <p>Досвід у нерухомості понад 8 років. Особисто супроводжує кожну угоду.</p>
+          <div class="team-contacts">
+            <a href="tel:+380000000000" class="team-contact-btn">📞 Зателефонувати</a>
+            <a href="https://www.instagram.com/grand_life_agency?igsh=MTNucjdyOHA2NWUwbQ==" target="_blank" class="team-contact-btn">📷 Instagram</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- КОНТАКТИ CTA -->
+<section class="about-cta">
+  <div class="about-cta-inner">
+    <h2>Готові співпрацювати?</h2>
+    <p>Зв'яжіться з нами — відповімо на всі питання та підберемо найкращий варіант</p>
+    <div class="cta-btns">
+      <a href="index.html#contacts" class="btn-main">Зв'язатися з нами</a>
+      <a href="catalog.html" class="btn-ghost">Переглянути об'єкти</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="logo" onclick="location.href='index.html'">
+      <img src="logo.png.png" alt="Grand Life">
+      <span class="logo-text">Grand <em>Life</em></span>
+    </div>
+    <p class="footer-copy">© 2025 Grand Life. Всі права захищені.</p>
+    <div class="footer-links">
+      <a href="index.html">Головна</a>
+      <a href="catalog.html">Об'єкти</a>
+      <a href="about.html">Про нас</a>
+      <a href="index.html#contacts">Контакти</a>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script src="about.js"></script>
+</body>
+</html>

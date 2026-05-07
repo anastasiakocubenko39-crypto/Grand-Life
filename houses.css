@@ -1,0 +1,659 @@
+/* ── СТОРІНКА БУДИНКІВ ── */
+    .page-hero {
+      padding: 120px 32px 60px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-hero-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .page-hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .page-hero h1 em { color: var(--gold); font-style: italic; }
+
+    .results-count {
+      font-size: 14px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .results-count span {
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    /* ── ФІЛЬТР ПАНЕЛЬ ── */
+    .filter-panel {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      position: sticky;
+      top: 72px;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+    }
+
+    .filter-panel-inner {
+      max-width: 1220px;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ── ФІЛЬТР КНОПКИ ── */
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+      border-color: rgba(201,168,76,0.4);
+      color: var(--text);
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #0d0a04;
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    .filter-btn .arrow {
+      font-size: 10px;
+      transition: transform 0.2s;
+    }
+
+    .filter-btn.open .arrow { transform: rotate(180deg); }
+
+    /* ── DROPDOWN ── */
+    .filter-group {
+      position: relative;
+    }
+
+    .filter-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 260px;
+      background: var(--bg2);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 18px;
+      padding: 20px;
+      z-index: 200;
+      display: none;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .filter-dropdown.open { display: block; }
+
+    .filter-dropdown h4 {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    /* Ціна range */
+    .price-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .price-inputs input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .price-inputs input:focus {
+      border-color: rgba(201,168,76,0.5);
+    }
+
+    .price-inputs input::placeholder { color: var(--text-muted); }
+
+    /* Чекбокси */
+    .check-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 6px 0;
+    }
+
+    .check-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--gold);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .check-item span {
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .check-item:hover span { color: var(--text); }
+
+    /* Площа range slider */
+    .range-wrap {
+      margin-top: 8px;
+    }
+
+    .range-wrap input[type="range"] {
+      width: 100%;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .apply-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #0d0a04;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: all 0.25s;
+    }
+
+    .apply-btn:hover {
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    /* ── СОРТУВАННЯ ── */
+    .sort-wrap {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sort-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .sort-select {
+      padding: 10px 18px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.25s;
+    }
+
+    .sort-select:focus {
+      border-color: rgba(201,168,76,0.4);
+    }
+
+    /* ── АКТИВНІ ФІЛЬТРИ ── */
+    .active-filters {
+      max-width: 1220px;
+      margin: 16px auto 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .active-tag {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 100px;
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      font-size: 13px;
+      color: var(--gold);
+    }
+
+    .active-tag button {
+      background: none;
+      border: none;
+      color: var(--gold);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+      margin: 0;
+    }
+
+    .clear-all {
+      font-size: 13px;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      transition: color 0.2s;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .clear-all:hover { color: var(--text); }
+
+    /* ── КАТАЛОГ ── */
+    .catalog-page {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 40px 32px 100px;
+    }
+
+    /* Вигляд: сітка / список */
+    .view-toggle {
+      display: flex;
+      gap: 8px;
+      margin-left: 8px;
+    }
+
+    .view-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active {
+      border-color: rgba(201,168,76,0.4);
+      color: var(--gold);
+      background: rgba(201,168,76,0.08);
+    }
+
+    /* Сітка карток */
+    .houses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .houses-grid.list-view {
+      grid-template-columns: 1fr;
+    }
+
+    /* ── КАРТКА БУДИНКУ ── */
+    .house-card {
+      border-radius: 22px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: all 0.35s;
+      animation: fadeUp 0.4s forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .house-card { transform: translateY(20px); }
+
+    .house-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(201,168,76,0.3);
+      box-shadow: 0 24px 50px rgba(0,0,0,0.4);
+    }
+
+    /* Список вигляд */
+    .list-view .house-card {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+    }
+
+    .list-view .house-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .card-img-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-img-wrap img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+      display: block;
+    }
+
+    .list-view .card-img-wrap img {
+      height: 100%;
+      min-height: 220px;
+    }
+
+    .house-card:hover .card-img-wrap img { transform: scale(1.05); }
+
+    .card-badges {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      backdrop-filter: blur(10px);
+    }
+
+    .badge-type {
+      background: rgba(7,12,20,0.82);
+      border: 1px solid var(--border);
+      color: var(--gold);
+    }
+
+    .badge-new {
+      background: rgba(39,174,96,0.85);
+      color: #fff;
+    }
+
+    .badge-hot {
+      background: rgba(231,76,60,0.85);
+      color: #fff;
+    }
+
+    .card-favorite {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(7,12,20,0.75);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .card-favorite:hover { border-color: rgba(201,168,76,0.5); }
+    .card-favorite.liked { background: rgba(231,76,60,0.3); border-color: #e74c3c; }
+
+    .house-info {
+      padding: 22px;
+    }
+
+    .house-info h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .house-location {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .house-price {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .house-price-uah {
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-left: 8px;
+    }
+
+    .house-specs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .spec-tag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.05);
+      padding: 5px 12px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+    }
+
+    .house-desc {
+      font-size: 13px;
+      color: rgba(240,236,228,0.55);
+      line-height: 1.6;
+      margin-bottom: 18px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-contact {
+      flex: 1;
+      padding: 11px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #0d0a04;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-align: center;
+    }
+
+    .btn-contact:hover {
+      box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    .btn-details {
+      padding: 11px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .btn-details:hover {
+      border-color: rgba(201,168,76,0.4);
+      color: var(--gold);
+    }
+
+    /* ── ПУСТО ── */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon { font-size: 64px; margin-bottom: 20px; }
+    .empty-state h3 { font-size: 22px; color: var(--text); margin-bottom: 10px; }
+    .empty-state p { font-size: 15px; }
+
+    /* ── ПАГІНАЦІЯ ── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 52px;
+      flex-wrap: wrap;
+    }
+
+    .page-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      color: var(--text-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover {
+      border-color: rgba(201,168,76,0.4);
+      color: var(--gold);
+    }
+
+    .page-btn.active {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #0d0a04;
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    /* ── АДАПТИВ ── */
+    @media (max-width: 768px) {
+      .page-hero { padding: 100px 20px 40px; }
+      .filter-panel { padding: 14px 20px; }
+      .catalog-page { padding: 24px 20px 80px; }
+      .houses-grid { grid-template-columns: 1fr; }
+      .list-view .house-card { grid-template-columns: 1fr; }
+      .list-view .card-img-wrap img { height: 220px; }
+      .sort-wrap { margin-left: 0; width: 100%; }
+      .filter-dropdown { left: auto; right: 0; }
+    }
+
+/* ── ВАЛЮТНІ ТАБИ ── */
+.currency-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.cur-tab {
+  flex: 1;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cur-tab.active {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #0d0a04;
+  border-color: transparent;
+}
+
+.cur-tab:hover:not(.active) {
+  border-color: rgba(201,168,76,0.4);
+  color: var(--text);
+}
+
+/* ── ЦІНА В ТРЬОХ ВАЛЮТАХ ── */
+.price-all-currencies {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
