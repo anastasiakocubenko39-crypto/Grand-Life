@@ -15,7 +15,7 @@ const TYPE_MAP = {
 
 // ── ДАНІ ──
 function getAllProps() {
-  return JSON.parse(localStorage.getItem("grandLifeProperties")) || [];
+  return window._grandLifeProps || [];
 }
 
 function priceToUSD(str) {
@@ -121,8 +121,12 @@ function renderPage() {
   page.forEach((h, i) => {
     const info = getTypeInfo(h.type);
     const card = document.createElement("div");
-    card.className = "house-card";
+    card.className = "house-card" + (h.sold ? " sold" : "");
     card.style.animationDelay = `${i * 0.05}s`;
+    const soldOverlay = h.sold ? `
+      <div class="sold-overlay">
+        <span class="sold-badge">✓ Продано</span>
+      </div>` : "";
 
     const usd = priceToUSD(h.price);
     const eur = usd > 0 ? Math.round(usd * 0.93) : 0;
@@ -134,6 +138,7 @@ function renderPage() {
     const isLand = (h.type||"").toLowerCase().includes("ділянка");
 
     card.innerHTML = `
+      ${soldOverlay}
       <div class="card-img-wrap">
         <img src="${h.image || 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80'}"
              alt="${h.title}" loading="lazy"
@@ -207,4 +212,5 @@ document.querySelectorAll(".sf-input").forEach(inp => {
   inp.addEventListener("input", applyFilters);
 });
 
-applyFilters();
+
+// Слухаємо Firebase — оновлення в реальному часі
