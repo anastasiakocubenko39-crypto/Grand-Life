@@ -121,7 +121,38 @@
   </div>
 </footer>
 
-<script src="script.js"></script>
+
 <script src="catalog.js"></script>
+<script>
+  // ── FIREBASE REST API — без eval, працює на GitHub Pages ──
+  const _PROJECT  = "grand-life-7c3a9";
+  const _API_KEY  = "AIzaSyATPexSn7etxoBsTsBd3JXND5R9MsrtvJk";
+  const _BASE_URL = `https://firestore.googleapis.com/v1/projects/${_PROJECT}/databases/(default)/documents`;
+
+  function _parseDoc(doc) {
+    const f = doc.fields || {};
+    const s = k => f[k] ? (f[k].stringValue || "") : "";
+    const b = k => f[k] ? (f[k].booleanValue || false) : false;
+    return {
+      id: doc.name.split("/").pop(),
+      title: s("title"), type: s("type"), location: s("location"),
+      price: s("price"), area: s("area"), rooms: s("rooms"),
+      image: s("image"), description: s("description"), sold: b("sold")
+    };
+  }
+
+  async function _loadAndRender() {
+    try {
+      const res  = await fetch(`${_BASE_URL}/properties?key=${_API_KEY}&pageSize=50`);
+      const data = await res.json();
+      window._grandLifeProps = data.documents ? data.documents.map(_parseDoc) : [];
+    } catch(e) {
+      console.error("Firebase REST error:", e);
+      window._grandLifeProps = [];
+    }
+    if (typeof applyFilters === "function") applyFilters();
+  }
+  _loadAndRender();
+</script>
 </body>
 </html>
