@@ -1,4 +1,3 @@
-
 // catalog.js — Grand Life — Всі об'єкти
 
 const ITEMS_PER_PAGE = 12;
@@ -14,7 +13,6 @@ const TYPE_MAP = {
   'оренда':   { label: 'Оренда',   icon: '🔑', page: 'rent.html' },
 };
 
-// ── ДАНІ ──
 function getAllProps() {
   return window._grandLifeProps || [];
 }
@@ -39,7 +37,6 @@ function getTypeInfo(typeStr) {
   return { label: typeStr||"Об'єкт", icon: '🏠', page: 'catalog.html' };
 }
 
-// ── ЛІЧИЛЬНИКИ ВКЛАДОК ──
 function updateCounts() {
   const all = getAllProps();
   document.getElementById("cnt-all").textContent = all.length;
@@ -50,7 +47,6 @@ function updateCounts() {
   });
 }
 
-// ── КАТЕГОРІЯ ──
 function setCategory(cat) {
   activeCategory = cat;
   document.querySelectorAll(".cat-tab-btn").forEach(b => b.classList.remove("active"));
@@ -59,7 +55,6 @@ function setCategory(cat) {
   applyFilters();
 }
 
-// ── ФІЛЬТРИ ──
 function applyFilters() {
   const all    = getAllProps();
   const search = (document.getElementById("mainSearch").value||"").toLowerCase();
@@ -70,23 +65,17 @@ function applyFilters() {
   const sort   = document.getElementById("sortSelect").value;
 
   filteredData = all.filter(h => {
-    // Категорія
     if (activeCategory !== 'all' && !(h.type||"").toLowerCase().includes(activeCategory)) return false;
-    // Ціна
     const usd = priceToUSD(h.price);
     if (pMin > 0 && usd < pMin) return false;
     if (usd > pMax) return false;
-    // Площа
     if (aMin > 0 && parseNum(h.area) < aMin) return false;
-    // Локація
     if (loc && !(h.location||"").toLowerCase().includes(loc)) return false;
-    // Пошук по всьому
     if (search && ![h.title, h.location, h.description, h.type, h.price, h.area, h.rooms]
         .some(f => (f||"").toLowerCase().includes(search))) return false;
     return true;
   });
 
-  // Сортування
   filteredData.sort((a, b) => {
     if (sort === "price_asc")  return priceToUSD(a.price) - priceToUSD(b.price);
     if (sort === "price_desc") return priceToUSD(b.price) - priceToUSD(a.price);
@@ -102,7 +91,6 @@ function applyFilters() {
   updateCounts();
 }
 
-// ── РЕНДЕР КАРТОК ──
 function renderPage() {
   const grid  = document.getElementById("housesGrid");
   const start = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -168,7 +156,6 @@ function renderPage() {
   });
 }
 
-// ── ПАГІНАЦІЯ ──
 function renderPagination() {
   const total = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const pag   = document.getElementById("pagination");
@@ -194,7 +181,6 @@ function renderPagination() {
   mk("→", currentPage + 1, currentPage === total);
 }
 
-// ── ВИГЛЯД ──
 function setView(type) {
   currentView = type;
   document.getElementById("housesGrid").classList.toggle("list-view", type === "list");
@@ -202,7 +188,6 @@ function setView(type) {
   document.getElementById("viewList").classList.toggle("active", type === "list");
 }
 
-// ── ОБРАНЕ ──
 function toggleFav(el) {
   el.classList.toggle("liked");
   el.textContent = el.classList.contains("liked") ? "❤️" : "🤍";
@@ -213,5 +198,25 @@ document.querySelectorAll(".sf-input").forEach(inp => {
   inp.addEventListener("input", applyFilters);
 });
 
+// ── BURGER MENU ──
+document.addEventListener("DOMContentLoaded", function() {
+  const burgerBtn    = document.getElementById("burgerBtn");
+  const sideMenu     = document.getElementById("sideMenu");
+  const menuOverlay  = document.getElementById("menuOverlay");
+  const closeMenuBtn = document.getElementById("closeMenu");
 
-// Слухаємо Firebase — оновлення в реальному часі
+  function openMenu() {
+    sideMenu.classList.add("active");
+    menuOverlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+  function closeMenuFn() {
+    sideMenu.classList.remove("active");
+    menuOverlay.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  if (burgerBtn)    burgerBtn.addEventListener("click", openMenu);
+  if (closeMenuBtn) closeMenuBtn.addEventListener("click", closeMenuFn);
+  if (menuOverlay)  menuOverlay.addEventListener("click", closeMenuFn);
+});
