@@ -14,33 +14,31 @@
 
 <!-- LOGIN PAGE -->
 <div id="loginPage" class="login-page">
-  <a href="index.html" class="login-back">← На головну</a>
+  <a href="index.html" class="login-back">&#8592; На головну</a>
   <div class="login-box">
     <div class="login-logo">
       <img src="logo.png.png" alt="Grand Life">
       <span class="logo-text">Grand <em>Life</em></span>
     </div>
     <h2>Адмін панель</h2>
-    <p class="login-subtitle">Введіть дані для входу</p>
-    <input type="text" id="loginInput" placeholder="Логін" autocomplete="off">
-    <input type="password" id="passInput" placeholder="Пароль">
-    <button id="loginBtn" class="admin-btn-main">Увійти →</button>
+    <p class="login-subtitle">Введіть email — ми надішлемо посилання для входу</p>
+    <input type="email" id="emailInput" placeholder="igor.grandlife@gmail.com" autocomplete="email">
+    <button id="loginBtn" class="admin-btn-main">Надіслати посилання &#8594;</button>
     <p id="loginError" class="login-error"></p>
   </div>
 </div>
 
-<!-- VERIFY PAGE -->
+<!-- MAGIC LINK SENT PAGE -->
 <div id="verifyPage" class="login-page hidden">
   <div class="login-box">
     <div class="login-logo">
       <img src="logo.png.png" alt="Grand Life">
       <span class="logo-text">Grand <em>Life</em></span>
     </div>
-    <h2>Підтвердження</h2>
-    <p class="login-subtitle" id="verifyHint">Код надіслано на пошту адміністратора</p>
-    <input type="text" id="codeInput" placeholder="6-значний код" maxlength="6" autocomplete="off">
-    <button id="verifyBtn" class="admin-btn-main">Підтвердити ✓</button>
-    <button id="resendBtn" class="admin-btn-ghost">↺ Надіслати ще раз</button>
+    <div style="font-size:48px;text-align:center;margin-bottom:16px">&#128236;</div>
+    <h2>Перевірте пошту</h2>
+    <p class="login-subtitle" id="verifyHint">Посилання для входу надіслано на вашу адресу.<br>Натисніть на нього — і ви одразу в адмін-панелі.</p>
+    <button id="resendBtn" class="admin-btn-ghost" style="margin-top:16px">&#8635; Надіслати ще раз</button>
     <p id="verifyError" class="login-error"></p>
   </div>
 </div>
@@ -273,6 +271,8 @@
   </main>
 </div>
 
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Firebase CDN -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -281,7 +281,7 @@
     updateDoc, query, orderBy, onSnapshot, serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // ── КОНФІГ ──
+  // ── FIREBASE КОНФІГ ──
   const _cfg = {
     apiKey: "AIzaSyATPexSn7etxoBsTsBd3JXND5R9MsrtvJk",
     authDomain: "grand-life-7c3a9.firebaseapp.com",
@@ -290,38 +290,84 @@
     messagingSenderId: "855282740287",
     appId: "1:855282740287:web:10081c86ad3a0c9c235c8a"
   };
-
   const _app = initializeApp(_cfg);
   const _db  = getFirestore(_app);
 
-  // ── НАЛАШТУВАННЯ ──
-  const ADMIN_LOGIN    = "admin";
-  const ADMIN_PASSWORD = "grandlife2025";
+  // ── SUPABASE КОНФІГ ──
+  const SUPABASE_URL  = "https://sinzjgxgvvencjvkokbc.supabase.co";
+  const SUPABASE_KEY  = "sb_publishable_gAYiilkETOHpmKRgQh_13Q_hxlS87yO";
+  const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const ADMIN_EMAIL = "igor.grandlife@gmail.com";
 
   let uploadedFiles     = [];
   let currentListFilter = "all";
   let allProps          = [];
 
-  // ── LOGIN ──
-  document.getElementById("loginBtn").addEventListener("click", doLogin);
-  document.getElementById("passInput").addEventListener("keydown", e => {
-    if (e.key === "Enter") doLogin();
+  // ── ПЕРЕВІРКА СЕСІЇ при завантаженні ──
+  _supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session && session.user.email === ADMIN_EMAIL) showAdmin();
   });
 
-  function doLogin() {
-    const login = document.getElementById("loginInput").value.trim();
-    const pass  = document.getElementById("passInput").value.trim();
-    const err   = document.getElementById("loginError");
-    if (login === ADMIN_LOGIN && pass === ADMIN_PASSWORD) {
-      err.textContent = "";
-      document.getElementById("loginPage").classList.add("hidden");
-      document.getElementById("adminPage").classList.remove("hidden");
-      initAdmin();
-    } else {
-      err.textContent = "Невірний логін або пароль";
-      shakeEl(document.getElementById("loginInput"));
-      shakeEl(document.getElementById("passInput"));
+  _supabase.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_IN" && session && session.user.email === ADMIN_EMAIL) {
+      showAdmin();
     }
+  });
+
+  // ── ВІДПРАВКА MAGIC LINK ──
+  document.getElementById("loginBtn").addEventListener("click", sendMagicLink);
+  document.getElementById("emailInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") sendMagicLink();
+  });
+
+  async function sendMagicLink() {
+    const email = document.getElementById("emailInput").value.trim();
+    const err   = document.getElementById("loginError");
+
+    if (!email) {
+      err.textContent = "Введіть email адресу";
+      shakeEl(document.getElementById("emailInput"));
+      return;
+    }
+    if (email !== ADMIN_EMAIL) {
+      err.textContent = "Ця адреса не має доступу до адмін-панелі";
+      shakeEl(document.getElementById("emailInput"));
+      return;
+    }
+
+    const btn = document.getElementById("loginBtn");
+    btn.textContent = "Надсилаємо...";
+    btn.disabled = true;
+    err.textContent = "";
+
+    const { error } = await _supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.href }
+    });
+
+    btn.textContent = "Надіслати посилання →";
+    btn.disabled = false;
+
+    if (error) {
+      err.textContent = "Помилка: " + error.message;
+    } else {
+      document.getElementById("loginPage").classList.add("hidden");
+      document.getElementById("verifyPage").classList.remove("hidden");
+    }
+  }
+
+  document.getElementById("resendBtn").addEventListener("click", () => {
+    document.getElementById("verifyPage").classList.add("hidden");
+    document.getElementById("loginPage").classList.remove("hidden");
+    document.getElementById("loginError").textContent = "";
+  });
+
+  function showAdmin() {
+    document.getElementById("loginPage").classList.add("hidden");
+    document.getElementById("verifyPage").classList.add("hidden");
+    document.getElementById("adminPage").classList.remove("hidden");
+    initAdmin();
   }
 
   function initAdmin() {
@@ -569,7 +615,10 @@
     return "🏠";
   }
 
-  window.logout = function() { location.reload(); };
+  window.logout = async function() {
+    await _supabase.auth.signOut();
+    location.reload();
+  };
 
   function shakeEl(el) {
     if (!el) return;
