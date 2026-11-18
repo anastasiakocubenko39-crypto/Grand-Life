@@ -51,7 +51,7 @@ async function auth() {
     if (error) $('#lErr').textContent = 'Помилка: ' + error.message;
     else $('#lForm').innerHTML = `<p>Готово! Перевірте пошту <b>${esc(email)}</b> і натисніть посилання в листі — панель відкриється автоматично.</p><div class="note">Лист може потрапити в «Спам» або «Промоакції».</div>`;
   };
-  $('#lSend').onclick = send; $('#lEmail').onkeydown = (e) => e.key === 'Enter' && send();
+  $('#lSend').onclick = send; $('#lEmail').onkeydown = (e) => { if (e.key === 'Enter') send(); };
   const { data } = await supa.auth.getSession();
   if (ok(data.session)) start(data.session.user.email);
   supa.auth.onAuthStateChange((_e, sess) => { if (ok(sess) && $('#app').hidden) start(sess.user.email); });
