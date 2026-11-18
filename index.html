@@ -1,306 +1,122 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com wss://*.firebaseio.com; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
-  <title>Grand Life — Нерухомість</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гранд Лайф — агентство нерухомості у Києві та області</title>
+<meta name="description" content="Квартири, будинки, земельні ділянки, оренда і комерційна нерухомість у Києві та Київській області. Юридичний супровід угоди з 2017 року.">
+<meta property="og:title" content="Гранд Лайф — агентство нерухомості у Києві та області">
+<meta property="og:description" content="Квартири, будинки, земельні ділянки, оренда і комерційна нерухомість у Києві та Київській області. Юридичний супровід угоди з 2017 року.">
+<meta property="og:image" content="assets/img/hero.webp">
+<link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="assets/app.css">
+<script src="config.js"></script>
 </head>
 <body>
-
-<!-- HEADER -->
-<header class="header">
-  <div class="logo" id="logoSecret">
-    <img src="logo.png.png" alt="Grand Life">
-    <span class="logo-text">Grand <em>Life</em></span>
-  </div>
-  <nav class="desktop-nav">
-    <a href="index.html">Головна</a>
-    <a href="catalog.html">Об'єкти</a>
-    <a href="about.html">Про нас</a>
-    <a href="#contacts">Контакти</a>
-  </nav>
-  <button class="burger" id="burgerBtn" aria-label="Меню">
-    <span></span><span></span><span></span>
-  </button>
-</header>
-
-<!-- OVERLAY -->
-<div class="menu-overlay" id="menuOverlay"></div>
-
-<!-- SIDE MENU -->
-<nav class="side-menu" id="sideMenu">
-  <button class="close-menu" id="closeMenu">×</button>
-  <div class="side-menu-links">
-    <a href="index.html"><span class="link-num">01</span>Головна</a>
-    <a href="catalog.html"><span class="link-num">02</span>Об'єкти</a>
-    <a href="about.html"><span class="link-num">03</span>Про нас</a>
-    <a href="#contacts"><span class="link-num">04</span>Контакти</a>
-  </div>
-  <div class="side-menu-footer">
-    <p>📍 Київ та область</p>
-    <p>📞 <a href="tel:+380639346533">063 934 65 33</a></p>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero" id="home">
-  <img
-    class="hero-bg"
-    src="hero.png"
-    onerror="this.src='https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1920&q=90'"
-    alt=""
-    aria-hidden="true"
-  >
-  <div class="hero-content">
-    <div class="hero-label">Продаж · Оренда · Земельні ділянки</div>
-    <h1>Нерухомість<br><em>для життя</em><br>та інвестицій</h1>
-    <p>Підбір квартир, будинків, ділянок та комерційної нерухомості у Києві та області.</p>
-    <div class="hero-actions">
-      <a href="catalog.html" class="btn-main">Переглянути об'єкти</a>
-      <a href="#contacts" class="btn-ghost">Зв'язатися</a>
+<main>
+  <section class="hero">
+    <div class="hero-bg"><img id="heroImg" alt=""></div>
+    <div class="wrap">
+      <span class="kicker rv" id="heroKicker"></span>
+      <h1 class="h1 rv" style="--d:.1s" id="heroTitle"></h1>
+      <p class="lead rv" style="--d:.2s" id="heroLead"></p>
+      <form class="qsearch rv" style="--d:.3s" action="catalog.html">
+        <label><span>Тип</span><select name="type" id="qType"><option value="">Усі об’єкти</option></select></label>
+        <label><span>Локація</span><input name="q" placeholder="Місто, район, вулиця"></label>
+        <label><span>Бюджет до, $</span><input name="max" inputmode="numeric" placeholder="Будь-який"></label>
+        <button class="btn" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Шукати</button>
+      </form>
+      <div class="hero-stats rv" style="--d:.4s" id="heroStats"></div>
     </div>
-  </div>
-  <div class="hero-scroll-hint">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
-  </div>
-</section>
+  </section>
 
-<!-- STATS -->
-<section class="stats-bar">
-  <div class="stat-item">
-    <span class="stat-num">120+</span>
-    <span class="stat-label">Об'єктів продано</span>
-  </div>
-  <div class="stat-divider"></div>
-  <div class="stat-item">
-    <span class="stat-num">8</span>
-    <span class="stat-label">Років на ринку</span>
-  </div>
-  <div class="stat-divider"></div>
-  <div class="stat-item">
-    <span class="stat-num">98%</span>
-    <span class="stat-label">Задоволених клієнтів</span>
-  </div>
-</section>
-
-<!-- CATEGORIES -->
-<section class="categories-section">
-  <div class="section-header">
-    <span class="section-tag">Категорії</span>
-    <h2>Що ви шукаєте?</h2>
-  </div>
-  <div class="categories-grid">
-    <a href="houses.html" class="cat-card">
-      <div class="cat-icon">🏡</div>
-      <h3>Будинки</h3>
-      <p>Приватні будинки та котеджі</p>
-      <span class="cat-arrow">→</span>
-    </a>
-    <a href="apartments.html" class="cat-card">
-      <div class="cat-icon">🏢</div>
-      <h3>Квартири</h3>
-      <p>Первинний та вторинний ринок</p>
-      <span class="cat-arrow">→</span>
-    </a>
-    <a href="land.html" class="cat-card">
-      <div class="cat-icon">🌳</div>
-      <h3>Ділянки</h3>
-      <p>Земля під забудову та відпочинок</p>
-      <span class="cat-arrow">→</span>
-    </a>
-    <a href="rent.html" class="cat-card">
-      <div class="cat-icon">🔑</div>
-      <h3>Оренда</h3>
-      <p>Подобова та довгострокова</p>
-      <span class="cat-arrow">→</span>
-    </a>
-  </div>
-</section>
-
-<!-- CATALOG PREVIEW -->
-<section class="section catalog-section" id="catalog">
-  <div class="section-header">
-    <span class="section-tag">Пропозиції</span>
-    <h2>Актуальні об'єкти</h2>
-  </div>
-  <div class="filter-box">
-    <input type="text" id="searchInput" placeholder="🔍  Пошук: місто, назва, тип..." />
-  </div>
-  <div class="property-grid" id="propertyGrid"></div>
-  <div class="catalog-cta">
-    <a href="catalog.html" class="btn-main">Всі об'єкти →</a>
-  </div>
-</section>
-
-<!-- WHY US -->
-<section class="why-section">
-  <div class="why-content">
-    <div class="section-header left">
-      <span class="section-tag">Переваги</span>
-      <h2>Чому обирають<br><em>Grand Life</em></h2>
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker rv">Категорії</span><h2 class="h2 rv">Що ви <em>шукаєте?</em></h2></div><a class="link rv" href="catalog.html">Усі об’єкти</a></div>
+      <div class="cats" id="cats"></div>
     </div>
-    <div class="why-grid">
-      <div class="why-card">
-        <div class="why-icon">🤝</div>
-        <h4>Особистий підхід</h4>
-        <p>Кожен клієнт отримує індивідуального менеджера та постійну підтримку.</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">📋</div>
-        <h4>Юридична чистота</h4>
-        <p>Повна перевірка документів та супровід угоди від початку до кінця.</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">💰</div>
-        <h4>Прозора ціна</h4>
-        <p>Жодних прихованих комісій. Ви знаєте вартість послуг заздалегідь.</p>
-      </div>
-      <div class="why-card">
-        <div class="why-icon">⚡</div>
-        <h4>Швидкий результат</h4>
-        <p>Середній строк продажу — 3 тижні завдяки широкій базі покупців.</p>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- CONTACTS -->
-<section class="section contacts-section" id="contacts">
-  <div class="section-header left">
-    <span class="section-tag">Контакти</span>
-    <h2>Готові<br>допомогти</h2>
-  </div>
-  <div class="contacts-grid">
-    <div class="contact-card">
-      <span class="contact-icon">📍</span>
+  <section class="sec tint">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker rv">Пропозиції</span><h2 class="h2 rv">Актуальні <em>об’єкти</em></h2></div><a class="btn line rv" href="catalog.html">Переглянути каталог</a></div>
+      <div class="grid" id="latest"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    </div>
+  </section>
+
+  <section class="sec dark">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker rv">Переваги</span><h2 class="h2 rv" id="whyTitle"></h2></div><p class="lead rv">Беремо на себе пошук, перевірку і всю бюрократію — вам лишається вибрати.</p></div>
+      <div class="feats rv" id="feats"></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap split">
+      <div class="split-img rv-img"><img id="aboutImg" alt="" loading="lazy"><div class="float rv" style="--d:.4s"><b id="aboutYears"></b><span id="aboutYearsText"></span></div></div>
       <div>
-        <strong>Адреса</strong>
-        <p>Київ та Київська область</p>
+        <span class="kicker rv">Про компанію</span>
+        <h2 class="h2 rv" style="margin-top:14px" id="aboutTitle"></h2>
+        <p class="lead rv" id="aboutLead" style="margin-top:18px"></p>
+        <ul class="checks" id="aboutChecks"></ul>
+        <a class="btn dark rv" href="about.html">Більше про нас <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
       </div>
     </div>
-    <div class="contact-card">
-      <span class="contact-icon">📞</span>
-      <div>
-        <strong>Телефон</strong>
-        <p><a href="tel:+380639346533">063 934 65 33</a></p>
-        <p><a href="tel:+380987917373">098 791 73 73</a></p>
+  </section>
+
+  <section class="sec tint">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker rv">Як ми працюємо</span><h2 class="h2 rv">Від заявки <em>до ключів</em></h2></div></div>
+      <div class="steps" id="steps"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="contacts" style="padding-bottom:0">
+    <div class="wrap">
+      <div class="cta rv">
+        <div><span class="kicker">Контакти</span><h2 class="h2" style="margin:16px 0" id="ctaTitle">Готові <em>допомогти</em></h2><p id="ctaText"></p></div>
+        <div class="cta-actions"><div class="contact-list" id="contactList"></div></div>
       </div>
     </div>
-    <div class="contact-card">
-      <span class="contact-icon">📷</span>
-      <div>
-        <strong>Instagram</strong>
-        <p><a href="https://www.instagram.com/grand_life_agency?igsh=MTNucjdyOHA2NWUwbQ==" target="_blank" rel="noopener">@grand_life_agency</a></p>
-      </div>
-    </div>
-    <div class="contact-card">
-      <span class="contact-icon">✉️</span>
-      <div>
-        <strong>Email</strong>
-        <p><a href="mailto:igor.grandlife@gmail.com">igor.grandlife@gmail.com</a></p>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
+</main>
+<script type="module">
+import { S, TYPES, I, esc, store, cardHTML, layout, reveal, telHref, $ } from './assets/core.js';
+layout({ page: 'home', overDark: true });
+$('#heroImg').src = S.heroImage;
+$('#heroKicker').textContent = S.heroKicker;
+$('#heroTitle').innerHTML = S.heroTitle;
+$('#heroLead').textContent = S.heroLead;
+$('#heroStats').innerHTML = S.stats.map(([b, t]) => `<div><b>${esc(b)}</b><span>${esc(t)}</span></div>`).join('');
+$('#qType').insertAdjacentHTML('beforeend', TYPES.map((t) => `<option value="${t.id}">${t.label}</option>`).join(''));
+$('#whyTitle').innerHTML = S.whyTitle;
+$('#feats').innerHTML = S.why.map(([ic, h, p]) => `<div class="feat"><div class="ic">${I[ic]}</div><h4>${esc(h)}</h4><p>${esc(p)}</p></div>`).join('');
+$('#aboutImg').src = S.aboutImage;
+$('#aboutYears').textContent = S.aboutBadge[0]; $('#aboutYearsText').textContent = S.aboutBadge[1];
+$('#aboutTitle').innerHTML = S.aboutTitle; $('#aboutLead').textContent = S.aboutLead;
+$('#aboutChecks').innerHTML = S.aboutChecks.map(([b, s], i) => `<li class="rv" style="--d:${i * .06}s">${I.check}<div><b>${esc(b)}</b><span>${esc(s)}</span></div></li>`).join('');
+$('#steps').innerHTML = S.steps.map(([h, p], i) => `<div class="step rv" style="--d:${i * .08}s"><h4>${esc(h)}</h4><p>${esc(p)}</p></div>`).join('');
+$('#ctaText').textContent = S.ctaText;
+$('#contactList').innerHTML = [
+  ...(S.phones || []).map((p) => `<a href="${telHref(p)}">${I.phone}${esc(p)}</a>`),
+  S.email && `<a href="mailto:${esc(S.email)}">${I.mail}${esc(S.email)}</a>`,
+  S.instagram && `<a href="https://instagram.com/${esc(S.instagram)}" target="_blank" rel="noopener">${I.insta}@${esc(S.instagram)}</a>`,
+  S.telegram && `<a href="${esc(S.telegram)}" target="_blank" rel="noopener">${I.tg}Telegram</a>`,
+  `<a>${I.pin}${esc(S.region)}</a>`,
+].filter(Boolean).join('') + `<a class="btn" href="catalog.html" style="margin-top:14px;justify-content:center">Переглянути об’єкти</a>`;
 
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="logo">
-      <img src="logo.png.png" alt="Grand Life">
-      <span class="logo-text">Grand <em>Life</em></span>
-    </div>
-    <p class="footer-copy">© <span id="footerYear"></span> Grand Life. Всі права захищені.</p>
-    <script>document.getElementById("footerYear").textContent = new Date().getFullYear();</script>
-    <div class="footer-links">
-      <a href="index.html">Головна</a>
-      <a href="catalog.html">Об'єкти</a>
-      <a href="about.html">Про нас</a>
-      <a href="#contacts">Контакти</a>
-    </div>
-  </div>
-</footer>
-
-<script src="script.js"></script>
-<script>
-  const _PROJECT  = "grand-life-7c3a9";
-  const _API_KEY  = "AIzaSyATPexSn7etxoBsTsBd3JXND5R9MsrtvJk";
-  const _BASE_URL = `https://firestore.googleapis.com/v1/projects/${_PROJECT}/databases/(default)/documents`;
-
-  function _parseDoc(doc) {
-    const f = doc.fields || {};
-    const s = k => f[k] ? (f[k].stringValue || "") : "";
-    const b = k => f[k] ? (f[k].booleanValue || false) : false;
-    return {
-      id: doc.name.split("/").pop(),
-      title: s("title"), type: s("type"), location: s("location"),
-      price: s("price"), area: s("area"), rooms: s("rooms"),
-      image: s("image"), description: s("description"), sold: b("sold")
-    };
-  }
-
-  const propertyGrid = document.getElementById("propertyGrid");
-  const searchInput  = document.getElementById("searchInput");
-  let allProps = [];
-
-  function renderProperties(list) {
-    if (!propertyGrid) return;
-    propertyGrid.innerHTML = "";
-    if (!list.length) {
-      propertyGrid.innerHTML = `<p class="no-results">Об'єктів не знайдено.</p>`;
-      return;
-    }
-    list.slice(0, 6).forEach((item, i) => {
-      const card = document.createElement("div");
-      card.className = "property-card";
-      card.style.animationDelay = `${i * 0.08}s`;
-      card.innerHTML = `
-        <div class="card-img-wrap">
-          <img src="${item.image||''}" alt="${item.title||''}" loading="lazy"
-               onerror="this.src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80'">
-          <div class="card-type-badge">${item.type||''}</div>
-        </div>
-        <div class="property-info">
-          <h3>${item.title||''}</h3>
-          <div class="price">${item.price||''}</div>
-          <div class="meta">
-            <span>📍 ${item.location||''}</span>
-            <span>📐 ${item.area||''}</span>
-            ${item.rooms && item.rooms!=='—' ? `<span>🛏️ ${item.rooms}</span>` : ''}
-          </div>
-          <p class="desc">${item.description||''}</p>
-        </div>`;
-      propertyGrid.appendChild(card);
-    });
-  }
-
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      const v = searchInput.value.toLowerCase();
-      renderProperties(allProps.filter(i =>
-        (i.title||"").toLowerCase().includes(v) ||
-        (i.type||"").toLowerCase().includes(v) ||
-        (i.location||"").toLowerCase().includes(v)
-      ));
-    });
-  }
-
-  async function loadProperties() {
-    try {
-      const res  = await fetch(`${_BASE_URL}/properties?key=${_API_KEY}&pageSize=50`);
-      const data = await res.json();
-      allProps = data.documents ? data.documents.map(_parseDoc) : [];
-      renderProperties(allProps);
-    } catch(e) { console.error(e); }
-  }
-
-  if (propertyGrid) loadProperties();
+let all = [];
+try { all = await store.all(); } catch (e) { console.error(e); }
+$('#cats').innerHTML = TYPES.filter((t) => t.img).map((t, i) => {
+  const n = all.filter((p) => p.type === t.id && !p.sold).length;
+  return `<a class="cat rv" style="--d:${i * .07}s" href="catalog.html?type=${encodeURIComponent(t.id)}"><img src="${t.img}" alt="" loading="lazy">${n ? `<i>${n} в наявності</i>` : ''}<b>${t.label}</b><span>${t.note}</span></a>`;
+}).join('');
+const latest = all.filter((p) => !p.sold).sort((a, b) => (b.featured - a.featured) || ((b.date || 0) - (a.date || 0))).slice(0, 6);
+$('#latest').innerHTML = latest.length ? latest.map(cardHTML).join('') : '<div class="empty"><b>Нові об’єкти скоро</b>Зателефонуйте нам — підберемо варіанти, яких ще немає на сайті.</div>';
+reveal();
 </script>
 </body>
 </html>

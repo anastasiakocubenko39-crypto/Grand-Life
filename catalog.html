@@ -1,158 +1,165 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Всі об'єкти — Grand Life</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="stylesheet" href="catalog.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Каталог об’єктів — Гранд Лайф</title>
+<meta name="description" content="Будинки, квартири, ділянки, оренда і комерційна нерухомість. Зручні фільтри за ціною, площею, кількістю кімнат і локацією.">
+<link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="assets/app.css">
+<script src="config.js"></script>
 </head>
 <body>
-
-<header class="header">
-  <div class="logo" onclick="location.href='index.html'">
-    <img src="logo.png.png" alt="Grand Life">
-    <span class="logo-text">Grand <em>Life</em></span>
-  </div>
-  <nav class="desktop-nav">
-    <a href="index.html">Головна</a>
-    <a href="catalog.html" style="color:var(--gold)">Об'єкти</a>
-    <a href="about.html">Про нас</a>
-    <a href="index.html#contacts">Контакти</a>
-  </nav>
-  <button class="burger" id="burgerBtn"><span></span><span></span><span></span></button>
-</header>
-
-<div class="menu-overlay" id="menuOverlay"></div>
-<nav class="side-menu" id="sideMenu">
-  <button class="close-menu" id="closeMenu">×</button>
-  <div class="side-menu-links">
-    <a href="index.html"><span class="link-num">01</span>Головна</a>
-    <a href="catalog.html"><span class="link-num">02</span>Об'єкти</a>
-    <a href="about.html"><span class="link-num">03</span>Про нас</a>
-    <a href="index.html#contacts"><span class="link-num">04</span>Контакти</a>
-  </div>
-  <div class="side-menu-footer">
-    <p>📍 Київ та область</p>
-    <p>📞 <a href="tel:+380000000000">+38 000 000 00 00</a></p>
-  </div>
-</nav>
-
-<section class="page-hero">
-  <div class="page-hero-inner">
-    <div class="section-tag" style="display:inline-block;margin-bottom:12px">Каталог</div>
-    <h1>Всі <em>об'єкти</em></h1>
-    <p>Будинки, квартири, ділянки та оренда — все в одному місці</p>
-  </div>
-</section>
-
-<div class="cat-tabs-bar">
-  <div class="cat-tabs-inner">
-    <button class="cat-tab-btn active" onclick="setCategory('all')" id="tab-all">
-      🏠 Всі <span class="cat-tab-count" id="cnt-all">0</span>
-    </button>
-    <button class="cat-tab-btn" onclick="setCategory('будинок')" id="tab-будинок">
-      🏡 Будинки <span class="cat-tab-count" id="cnt-будинок">0</span>
-    </button>
-    <button class="cat-tab-btn" onclick="setCategory('квартира')" id="tab-квартира">
-      🏢 Квартири <span class="cat-tab-count" id="cnt-квартира">0</span>
-    </button>
-    <button class="cat-tab-btn" onclick="setCategory('ділянка')" id="tab-ділянка">
-      🌳 Ділянки <span class="cat-tab-count" id="cnt-ділянка">0</span>
-    </button>
-    <button class="cat-tab-btn" onclick="setCategory('оренда')" id="tab-оренда">
-      🔑 Оренда <span class="cat-tab-count" id="cnt-оренда">0</span>
-    </button>
-  </div>
-</div>
-
-<div class="search-bar">
-  <div class="search-bar-inner">
-    <div class="search-main">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="mainSearch" placeholder="Пошук за назвою, містом, описом..." oninput="applyFilters()">
+<main>
+  <section class="phead">
+    <div class="wrap">
+      <div class="crumbs"><a href="index.html">Головна</a><span>/</span><span id="crumb">Каталог</span></div>
+      <h1 class="h1" id="pageTitle">Каталог <em>об’єктів</em></h1>
     </div>
-    <div class="search-filters">
-      <input type="text" class="sf-input" id="locSearch" placeholder="📍 Місто..." oninput="applyFilters()" style="width:150px">
-      <span class="sf-label">Ціна $</span>
-      <input type="number" class="sf-input" id="priceMin" placeholder="Від" min="0">
-      <input type="number" class="sf-input" id="priceMax" placeholder="До" min="0">
-      <span class="sf-label">Площа від</span>
-      <input type="number" class="sf-input" id="areaMin" placeholder="м²" min="0">
-      <select class="sf-select" id="sortSelect" onchange="applyFilters()">
-        <option value="newest">Новіші</option>
-        <option value="price_asc">Ціна ↑</option>
-        <option value="price_desc">Ціна ↓</option>
-        <option value="area_asc">Площа ↑</option>
-        <option value="area_desc">Площа ↓</option>
-      </select>
-    </div>
-    <div class="search-results-info">Знайдено: <span id="countDisplay">0</span></div>
+  </section>
+  <div class="wrap cat-layout">
+    <aside class="filters" id="filters" aria-label="Фільтри">
+      <h3>Фільтри <button type="button" id="reset">Скинути</button></h3>
+      <div class="fgroup"><span>Тип об’єкта</span><div class="chips" id="fType"></div></div>
+      <div class="fgroup"><span>Пошук</span><input class="field" id="fQ" placeholder="Назва, місто, район"></div>
+      <div class="fgroup"><span>Локація</span><select class="field" id="fLoc"><option value="">Усі локації</option></select></div>
+      <div class="fgroup"><span>Ціна, $</span><div class="range"><input class="field" id="fMin" inputmode="numeric" placeholder="від"><input class="field" id="fMax" inputmode="numeric" placeholder="до"></div></div>
+      <div class="fgroup"><span>Площа, м²</span><div class="range"><input class="field" id="fAMin" inputmode="numeric" placeholder="від"><input class="field" id="fAMax" inputmode="numeric" placeholder="до"></div></div>
+      <div class="fgroup" id="roomsGroup"><span>Кімнат</span><div class="chips" id="fRooms"></div></div>
+      <div class="fgroup"><span>Стан</span><select class="field" id="fCond"><option value="">Будь-який</option></select></div>
+      <div class="fgroup"><span>Особливості</span><div class="chips" id="fFeat"></div></div>
+      <div class="fgroup"><label class="check"><input type="checkbox" id="fPhoto"> Лише з фото</label><label class="check" style="margin-top:10px"><input type="checkbox" id="fSold"> Показати продані</label></div>
+      <button class="btn block apply" type="button" id="apply">Показати</button>
+    </aside>
+    <section>
+      <div class="toolbar">
+        <div class="count" id="count">Завантаження…</div>
+        <div class="toolbar-r">
+          <button class="btn line sm filters-open" type="button" id="openF"></button>
+          <select class="field" id="sort" aria-label="Сортування">
+            <option value="new">Спочатку нові</option><option value="cheap">Спочатку дешевші</option><option value="exp">Спочатку дорожчі</option><option value="area">За площею</option>
+          </select>
+          <button class="viewbtn" id="vGrid" aria-pressed="true" aria-label="Плиткою"></button>
+          <button class="viewbtn" id="vList" aria-pressed="false" aria-label="Списком"></button>
+        </div>
+      </div>
+      <div class="active-tags" id="tags"></div>
+      <div class="grid" id="grid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+    </section>
   </div>
-</div>
+</main>
+<script type="module">
+import { S, TYPES, TYPE, CONDITIONS, I, esc, store, cardHTML, layout, reveal, $, $$ } from './assets/core.js';
+layout({ page: 'catalog' });
+$('#openF').innerHTML = I.filter + 'Фільтри'; $('#vGrid').innerHTML = I.grid; $('#vList').innerHTML = I.list;
+const QUICK = ['Можлива іпотека', 'Можлива розстрочка', 'Укриття', 'Генератор / автономність', 'Паркінг', 'Тераса', 'Меблі', 'Можна з тваринами'];
+const params = new URLSearchParams(location.search);
+const st = {
+  type: params.get('type') || '', q: params.get('q') || '', loc: params.get('loc') || '',
+  min: params.get('min') || '', max: params.get('max') || '', amin: params.get('amin') || '', amax: params.get('amax') || '',
+  rooms: params.get('rooms') || '', cond: params.get('cond') || '', feat: (params.get('feat') || '').split('|').filter(Boolean),
+  photo: params.get('photo') === '1', sold: params.get('sold') === '1', sort: params.get('sort') || 'new', view: localStorage.getItem('view') || 'grid',
+};
+let ALL = [];
 
-<div class="catalog-page">
-  <div class="sort-row">
-    <div class="view-toggle">
-      <button class="view-btn active" id="viewGrid" onclick="setView('grid')" title="Сітка">⊞</button>
-      <button class="view-btn" id="viewList" onclick="setView('list')" title="Список">☰</button>
-    </div>
-  </div>
-  <div class="houses-grid" id="housesGrid"></div>
-  <div class="pagination" id="pagination"></div>
-</div>
+$('#fType').innerHTML = [['', 'Усі'], ...TYPES.map((t) => [t.id, t.label])].map(([v, l]) => `<button type="button" class="chip" data-v="${v}">${l}</button>`).join('');
+$('#fRooms').innerHTML = [['', 'Будь-яка'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4+']].map(([v, l]) => `<button type="button" class="chip" data-v="${v}">${l}</button>`).join('');
+$('#fCond').insertAdjacentHTML('beforeend', CONDITIONS.map((c) => `<option>${c}</option>`).join(''));
+$('#fFeat').innerHTML = QUICK.map((f) => `<button type="button" class="chip" data-v="${f}">${f}</button>`).join('');
 
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="logo" onclick="location.href='index.html'">
-      <img src="logo.png.png" alt="Grand Life">
-      <span class="logo-text">Grand <em>Life</em></span>
-    </div>
-    <p class="footer-copy">© 2025 Grand Life. Всі права захищені.</p>
-    <div class="footer-links">
-      <a href="index.html">Головна</a>
-      <a href="catalog.html">Об'єкти</a>
-      <a href="about.html">Про нас</a>
-      <a href="index.html#contacts">Контакти</a>
-    </div>
-  </div>
-</footer>
+function syncUI() {
+  $$('#fType .chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.v === st.type));
+  $$('#fRooms .chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.v === st.rooms));
+  $$('#fFeat .chip').forEach((c) => c.setAttribute('aria-pressed', st.feat.includes(c.dataset.v)));
+  $('#fQ').value = st.q; $('#fLoc').value = st.loc; $('#fMin').value = st.min; $('#fMax').value = st.max; $('#fAMin').value = st.amin; $('#fAMax').value = st.amax;
+  $('#fCond').value = st.cond; $('#fPhoto').checked = st.photo; $('#fSold').checked = st.sold; $('#sort').value = st.sort;
+  $('#roomsGroup').hidden = st.type === 'Ділянка';
+  $('#vGrid').setAttribute('aria-pressed', st.view === 'grid'); $('#vList').setAttribute('aria-pressed', st.view === 'list');
+  const t = TYPE[st.type];
+  $('#pageTitle').innerHTML = t ? `${esc(t.label)} <em>${t.id === 'Оренда' ? 'в оренду' : 'на продаж'}</em>` : 'Каталог <em>об’єктів</em>';
+  $('#crumb').textContent = t ? t.label : 'Каталог';
+  document.title = `${t ? t.label : 'Каталог об’єктів'} — ${S.name}`;
+}
+const n = (v) => (v === '' ? null : parseFloat(String(v).replace(/\s/g, '')));
+function apply() {
+  const q = st.q.trim().toLowerCase();
+  let l = ALL.filter((p) => (st.sold || !p.sold)
+    && (!st.type || p.type === st.type)
+    && (!q || `${p.title} ${p.location} ${p.address || ''} ${p.description || ''}`.toLowerCase().includes(q))
+    && (!st.loc || p.location === st.loc)
+    && (n(st.min) == null || (p.usd != null && p.usd >= n(st.min)))
+    && (n(st.max) == null || (p.usd != null && p.usd <= n(st.max)))
+    && (n(st.amin) == null || (p.areaValue != null && toM2(p) >= n(st.amin)))
+    && (n(st.amax) == null || (p.areaValue != null && toM2(p) <= n(st.amax)))
+    && (!st.rooms || (st.rooms === '4' ? p.roomsNum >= 4 : p.roomsNum === +st.rooms))
+    && (!st.cond || p.condition === st.cond)
+    && st.feat.every((f) => p.features.includes(f))
+    && (!st.photo || p.images.length));
+  const by = { new: (a, b) => (b.featured - a.featured) || ((b.date || 0) - (a.date || 0)), cheap: (a, b) => (a.usd ?? 1e15) - (b.usd ?? 1e15), exp: (a, b) => (b.usd ?? -1) - (a.usd ?? -1), area: (a, b) => (toM2(b) || 0) - (toM2(a) || 0) };
+  l.sort(by[st.sort] || by.new);
+  const grid = $('#grid');
+  grid.classList.toggle('list', st.view === 'list');
+  grid.innerHTML = l.length ? l.map(cardHTML).join('') : '<div class="empty"><b>Нічого не знайдено</b>Спробуйте змінити фільтри або <a href="#" id="reset2">скинути їх</a>. Також можемо підібрати об’єкт індивідуально — зателефонуйте нам.</div>';
+  $('#reset2')?.addEventListener('click', (e) => { e.preventDefault(); reset(); });
+  const word = (k) => (k % 10 === 1 && k % 100 !== 11 ? 'об’єкт' : [2, 3, 4].includes(k % 10) && ![12, 13, 14].includes(k % 100) ? 'об’єкти' : 'об’єктів');
+  $('#count').innerHTML = `Знайдено <b>${l.length}</b> ${word(l.length)}`;
+  const active = activeCount();
+  $('#openF').innerHTML = I.filter + 'Фільтри' + (active ? ` · ${active}` : '');
+  tags(); reveal(grid);
+  const qs = new URLSearchParams();
+  for (const k of ['type', 'q', 'loc', 'min', 'max', 'amin', 'amax', 'rooms', 'cond']) if (st[k]) qs.set(k, st[k]);
+  if (st.feat.length) qs.set('feat', st.feat.join('|')); if (st.photo) qs.set('photo', 1); if (st.sold) qs.set('sold', 1); if (st.sort !== 'new') qs.set('sort', st.sort);
+  history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs : ''));
+}
+const toM2 = (p) => (p.areaValue == null ? null : p.areaUnit === 'сот' ? p.areaValue * 100 : p.areaUnit === 'га' ? p.areaValue * 10000 : p.areaValue);
+const activeCount = () => ['type', 'q', 'loc', 'min', 'max', 'amin', 'amax', 'rooms', 'cond'].filter((k) => st[k]).length + st.feat.length + (st.photo ? 1 : 0);
+function tags() {
+  const t = [];
+  if (st.type) t.push(['type', TYPE[st.type]?.label]);
+  if (st.q) t.push(['q', `«${st.q}»`]); if (st.loc) t.push(['loc', st.loc]);
+  if (st.min || st.max) t.push(['price', `$${st.min || 0} – ${st.max ? '$' + st.max : '∞'}`]);
+  if (st.amin || st.amax) t.push(['areaR', `${st.amin || 0} – ${st.amax || '∞'} м²`]);
+  if (st.rooms) t.push(['rooms', `${st.rooms}${st.rooms === '4' ? '+' : ''} кімн.`]); if (st.cond) t.push(['cond', st.cond]);
+  st.feat.forEach((f) => t.push(['feat:' + f, f])); if (st.photo) t.push(['photo', 'з фото']);
+  $('#tags').innerHTML = t.map(([k, l]) => `<button data-k="${esc(k)}">${esc(l)} ×</button>`).join('');
+}
+$('#tags').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return; const k = b.dataset.k;
+  if (k.startsWith('feat:')) st.feat = st.feat.filter((f) => f !== k.slice(5));
+  else if (k === 'price') { st.min = st.max = ''; } else if (k === 'areaR') { st.amin = st.amax = ''; } else if (k === 'photo') st.photo = false; else st[k] = '';
+  syncUI(); apply();
+});
+function reset() { Object.assign(st, { type: '', q: '', loc: '', min: '', max: '', amin: '', amax: '', rooms: '', cond: '', feat: [], photo: false, sold: false }); syncUI(); apply(); }
+$('#reset').onclick = reset;
+$('#fType').onclick = (e) => { const c = e.target.closest('.chip'); if (!c) return; st.type = c.dataset.v; syncUI(); apply(); };
+$('#fRooms').onclick = (e) => { const c = e.target.closest('.chip'); if (!c) return; st.rooms = c.dataset.v; syncUI(); apply(); };
+$('#fFeat').onclick = (e) => { const c = e.target.closest('.chip'); if (!c) return; const v = c.dataset.v; st.feat = st.feat.includes(v) ? st.feat.filter((f) => f !== v) : [...st.feat, v]; syncUI(); apply(); };
+let t;
+const bind = (id, k) => $(id).addEventListener('input', (e) => {
+  if (k !== 'q') e.target.value = e.target.value.replace(/[^\d]/g, '');
+  st[k] = e.target.value; clearTimeout(t); t = setTimeout(apply, 220);
+});
+[['#fQ', 'q'], ['#fMin', 'min'], ['#fMax', 'max'], ['#fAMin', 'amin'], ['#fAMax', 'amax']].forEach(([i, k]) => bind(i, k));
+$('#fLoc').onchange = (e) => { st.loc = e.target.value; apply(); };
+$('#fCond').onchange = (e) => { st.cond = e.target.value; apply(); };
+$('#fPhoto').onchange = (e) => { st.photo = e.target.checked; apply(); };
+$('#fSold').onchange = (e) => { st.sold = e.target.checked; apply(); };
+$('#sort').onchange = (e) => { st.sort = e.target.value; apply(); };
+const setView = (v) => { st.view = v; try { localStorage.setItem('view', v); } catch {} syncUI(); apply(); };
+$('#vGrid').onclick = () => setView('grid'); $('#vList').onclick = () => setView('list');
+const F = $('#filters');
+$('#openF').onclick = () => { F.classList.add('open'); document.body.style.overflow = 'hidden'; };
+$('#apply').onclick = () => { F.classList.remove('open'); document.body.style.overflow = ''; scrollTo({ top: 0, behavior: 'smooth' }); };
 
-
-<script src="catalog.js"></script>
-<script>
-  // ── FIREBASE REST API — без eval, працює на GitHub Pages ──
-  const _PROJECT  = "grand-life-7c3a9";
-  const _API_KEY  = "AIzaSyATPexSn7etxoBsTsBd3JXND5R9MsrtvJk";
-  const _BASE_URL = `https://firestore.googleapis.com/v1/projects/${_PROJECT}/databases/(default)/documents`;
-
-  function _parseDoc(doc) {
-    const f = doc.fields || {};
-    const s = k => f[k] ? (f[k].stringValue || "") : "";
-    const b = k => f[k] ? (f[k].booleanValue || false) : false;
-    return {
-      id: doc.name.split("/").pop(),
-      title: s("title"), type: s("type"), location: s("location"),
-      price: s("price"), area: s("area"), rooms: s("rooms"),
-      image: s("image"), description: s("description"), sold: b("sold")
-    };
-  }
-
-  async function _loadAndRender() {
-    try {
-      const res  = await fetch(`${_BASE_URL}/properties?key=${_API_KEY}&pageSize=50`);
-      const data = await res.json();
-      window._grandLifeProps = data.documents ? data.documents.map(_parseDoc) : [];
-    } catch(e) {
-      console.error("Firebase REST error:", e);
-      window._grandLifeProps = [];
-    }
-    if (typeof applyFilters === "function") applyFilters();
-  }
-  _loadAndRender();
+syncUI();
+try { ALL = await store.all(); } catch (e) { console.error(e); $('#grid').innerHTML = '<div class="empty"><b>Не вдалося завантажити</b>Перевірте з’єднання та оновіть сторінку.</div>'; }
+const locs = [...new Set(ALL.map((p) => p.location.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'uk'));
+$('#fLoc').insertAdjacentHTML('beforeend', locs.map((l) => `<option>${esc(l)}</option>`).join(''));
+$('#fLoc').value = st.loc;
+if (!$('#grid .empty')) apply();
 </script>
 </body>
 </html>

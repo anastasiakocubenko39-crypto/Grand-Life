@@ -1,0 +1,217 @@
+/* Realty template — data layer, helpers, layout, animations */
+const S = window.SITE;
+export { S };
+
+/* ── types ── */
+export const TYPES = [
+  { id: 'Будинок', label: 'Будинки', one: 'Будинок', note: 'Приватні будинки та котеджі', img: S.catImages?.['Будинок'] },
+  { id: 'Квартира', label: 'Квартири', one: 'Квартира', note: 'Новобудови та вторинний ринок', img: S.catImages?.['Квартира'] },
+  { id: 'Ділянка', label: 'Ділянки', one: 'Ділянка', note: 'Земля під забудову та відпочинок', img: S.catImages?.['Ділянка'] },
+  { id: 'Оренда', label: 'Оренда', one: 'Оренда', note: 'Довгострокова оренда житла', img: S.catImages?.['Оренда'] },
+  { id: 'Комерція', label: 'Комерція', one: 'Комерційна', note: 'Офіси, магазини, склади', img: S.catImages?.['Комерція'] },
+];
+export const TYPE = Object.fromEntries(TYPES.map((t) => [t.id, t]));
+
+export const CONDITIONS = ['Новобудова від забудовника', 'Дизайнерський ремонт', 'Євроремонт', 'Сучасний ремонт', 'Житловий стан', 'Під ремонт', 'Після будівельників'];
+export const WALLS = ['Цегла', 'Моноліт', 'Газоблок', 'Керамоблок', 'Панель', 'Дерево / каркас', 'Інше'];
+export const HEATING = ['Індивідуальне газове', 'Централізоване', 'Електричне', 'Тепловий насос', 'Твердопаливне', 'Комбіноване', 'Немає'];
+export const PURPOSES = ['Будівництво житлового будинку (ІЖБ)', 'Особисте селянське господарство', 'Садівництво', 'Комерційне призначення', 'Сільськогосподарське'];
+export const FEATURES = {
+  'Комунікації': ['Світло', 'Газ', 'Вода (центральна)', 'Свердловина', 'Каналізація', 'Септик', 'Інтернет'],
+  'Комфорт': ['Меблі', 'Побутова техніка', 'Кондиціонер', 'Тепла підлога', 'Камін', 'Гардеробна', 'Панорамні вікна'],
+  'Простір': ['Балкон', 'Лоджія', 'Тераса', 'Сад', 'Басейн', 'Лазня / сауна', 'Гараж', 'Паркінг', 'Комора'],
+  'Будинок і безпека': ['Ліфт', 'Укриття', 'Генератор / автономність', 'Охорона', 'Відеоспостереження', 'Закрита територія', 'Консьєрж'],
+  'Поруч': ['Школа', 'Дитячий садок', 'Супермаркет', 'Ліс', 'Водойма', 'Парк', 'Метро', 'Зупинка транспорту'],
+  'Умови': ['Можлива іпотека', 'Можлива розстрочка', 'Торг доречний', 'Можна з тваринами', 'Можна з дітьми', 'Документи готові'],
+};
+
+/* ── helpers ── */
+export const $ = (s, r = document) => r.querySelector(s);
+export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+export const safeImg = (u) => { u = String(u || '').trim(); if (!u) return ''; if (u.startsWith('data:image/')) return u; try { const x = new URL(u, location.href); return /^https?:$/.test(x.protocol) ? x.href : ''; } catch { return ''; } };
+const toDate = (v) => (v?.toDate ? v.toDate() : v?.seconds ? new Date(v.seconds * 1000) : v ? new Date(v) : null);
+const num = (v) => { if (v === '' || v == null) return null; const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.').replace(/[^\d.]/g, '')); return isFinite(n) ? n : null; };
+export const fmt = (n) => (n == null ? '' : Math.round(n).toLocaleString('uk-UA').replace(/,/g, ' '));
+const RATE = { '$': 1, '€': 1.08, '₴': 1 / 41.5 };
+
+export function norm(id, d) {
+  const p = { ...d, id };
+  p.images = (Array.isArray(d.images) && d.images.length ? d.images : d.image ? [d.image] : []).map(safeImg).filter(Boolean);
+  p.type = TYPE[d.type] ? d.type : 'Квартира';
+  if (d.priceValue != null && d.priceValue !== '') { p.priceValue = num(d.priceValue); p.currency = d.currency || '$'; }
+  else if (d.price) { p.priceValue = num(String(d.price).match(/[\d\s.,]+/)?.[0]); p.currency = /€/.test(d.price) ? '€' : /₴|грн|uah/i.test(d.price) ? '₴' : '$'; }
+  else { p.priceValue = null; p.currency = '$'; }
+  p.usd = p.priceValue != null ? p.priceValue * RATE[p.currency] : null;
+  if (d.areaValue != null && d.areaValue !== '') { p.areaValue = num(d.areaValue); p.areaUnit = d.areaUnit || 'м²'; }
+  else if (d.area) { p.areaValue = num(String(d.area).match(/[\d\s.,]+/)?.[0]); p.areaUnit = /сот/.test(d.area) ? 'сот' : /га/.test(d.area) ? 'га' : 'м²'; }
+  else { p.areaValue = null; p.areaUnit = 'м²'; }
+  p.roomsNum = num(d.rooms);
+  p.date = toDate(d.addedAt);
+  p.features = Array.isArray(d.features) ? d.features : [];
+  p.title = d.title || 'Об’єкт без назви';
+  p.location = d.location || '';
+  return p;
+}
+
+export const priceHTML = (p, cls = '') => p.priceValue == null ? `<span class="price ${cls}">Ціна за запитом</span>`
+  : `<span class="price ${cls}">${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' <small>/ місяць</small>' : ''}</span>`;
+export const priceText = (p) => p.priceValue == null ? 'За запитом' : `${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' / міс' : ''}`;
+export const areaText = (p) => (p.areaValue != null ? `${String(p.areaValue).replace('.', ',')} ${p.areaUnit}` : '');
+
+/* ── icons ── */
+export const I = {
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  area: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  bed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 18V7M3 13h18v5M7 13V10h5a3 3 0 0 1 3 3"/></svg>',
+  floor: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20h16M6 20V9l6-5 6 5v11M10 20v-5h4v5"/></svg>',
+  photo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  insta: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>',
+  tg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M21 4 3 11l6 2 2 6 3-4 5 4z"/><path d="m9 13 8-6"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>',
+  tick: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+  coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .9-3 2.2 0 3 6 1.6 6 4.6 0 1.3-1.3 2.2-3 2.2-1.4 0-2.6-.6-3.1-1.6M12 6v2M12 16v2"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></svg>',
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M15 8l2 2"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/></svg>',
+  left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m15 5-7 7 7 7"/></svg>',
+  right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m9 5 7 7-7 7"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
+};
+
+/* ── data ── */
+let fb = null;
+async function firebase() {
+  if (fb) return fb;
+  const [{ initializeApp }, fs] = await Promise.all([
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'),
+  ]);
+  const app = initializeApp(S.firebase);
+  fb = { fs, db: fs.getFirestore(app) };
+  return fb;
+}
+const DEMO_KEY = (S.storageKey || 'realty') + '_props_v1';
+async function demoAll() {
+  try { const s = localStorage.getItem(DEMO_KEY); if (s) return JSON.parse(s); } catch {}
+  const list = await (await fetch('data/demo.json')).json();
+  try { localStorage.setItem(DEMO_KEY, JSON.stringify(list)); } catch {}
+  return list;
+}
+const demoSave = (list) => { localStorage.setItem(DEMO_KEY, JSON.stringify(list)); };
+
+export const store = {
+  demo: !S.firebase,
+  async all() {
+    if (!S.firebase) return (await demoAll()).map((d) => norm(d.id, d));
+    const { fs, db } = await firebase();
+    const snap = await fs.getDocs(fs.collection(db, 'properties'));
+    return snap.docs.map((d) => norm(d.id, d.data()));
+  },
+  async one(id) {
+    if (!S.firebase) { const d = (await demoAll()).find((x) => x.id === id); return d ? norm(d.id, d) : null; }
+    const { fs, db } = await firebase();
+    const s = await fs.getDoc(fs.doc(db, 'properties', id));
+    return s.exists() ? norm(s.id, s.data()) : null;
+  },
+  async raw() {
+    if (!S.firebase) return demoAll();
+    const { fs, db } = await firebase();
+    const snap = await fs.getDocs(fs.collection(db, 'properties'));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  },
+  async add(data) {
+    if (!S.firebase) { const l = await demoAll(); const id = 'd' + Date.now().toString(36); l.unshift({ ...data, id, addedAt: new Date().toISOString() }); demoSave(l); return id; }
+    const { fs, db } = await firebase();
+    const r = await fs.addDoc(fs.collection(db, 'properties'), { ...data, addedAt: fs.serverTimestamp() });
+    return r.id;
+  },
+  async update(id, data) {
+    if (!S.firebase) { const l = await demoAll(); const i = l.findIndex((x) => x.id === id); if (i > -1) l[i] = { ...l[i], ...data }; demoSave(l); return; }
+    const { fs, db } = await firebase();
+    await fs.updateDoc(fs.doc(db, 'properties', id), { ...data, updatedAt: fs.serverTimestamp() });
+  },
+  async remove(id) {
+    if (!S.firebase) { demoSave((await demoAll()).filter((x) => x.id !== id)); return; }
+    const { fs, db } = await firebase();
+    await fs.deleteDoc(fs.doc(db, 'properties', id));
+  },
+  resetDemo() { localStorage.removeItem(DEMO_KEY); },
+};
+
+/* ── card ── */
+export const shortPurpose = (s) => (s.match(/\(([^)]+)\)/)?.[1] || s.split(' ').slice(0, 2).join(' '));
+export function cardHTML(p, i = 0) {
+  const img = p.images[0];
+  const specs = [
+    areaText(p) && `<span>${I.area}${areaText(p)}</span>`,
+    p.type !== 'Ділянка' && p.roomsNum && `<span>${I.bed}${p.roomsNum} кімн.</span>`,
+    p.floor && `<span>${I.floor}${esc(p.floor)}${p.floors ? '/' + esc(p.floors) : ''} пов.</span>`,
+    p.type === 'Ділянка' && p.purpose && `<span>${I.floor}${esc(shortPurpose(p.purpose))}</span>`,
+  ].filter(Boolean).join('');
+  return `<a class="pcard rv${p.sold ? ' is-sold' : ''}" style="--d:${(i % 3) * 0.07}s" href="object.html?id=${encodeURIComponent(p.id)}">
+    <div class="pcard-img">
+      ${img ? `<img src="${esc(img)}" alt="${esc(p.title)}" loading="lazy">` : `<div class="noimg"><img src="${S.mark}" alt=""></div>`}
+      <div class="badges"><span class="badge">${esc(TYPE[p.type].one)}</span>${p.featured ? `<span class="badge accent">${esc(S.featuredLabel || 'Ексклюзив')}</span>` : ''}${p.sold ? `<span class="badge sold">${p.type === 'Оренда' ? 'Здано' : 'Продано'}</span>` : ''}</div>
+      ${p.images.length > 1 ? `<span class="pcount">${I.photo}${p.images.length}</span>` : ''}
+    </div>
+    <div class="pcard-body">
+      ${priceHTML(p)}
+      <h3>${esc(p.title)}</h3>
+      ${p.location ? `<div class="loc">${I.pin}<span>${esc(p.location)}</span></div>` : ''}
+      ${specs ? `<div class="specs">${specs}</div>` : ''}
+    </div>
+  </a>`;
+}
+
+/* ── layout ── */
+export function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.append(d); setTimeout(() => d.remove(), 2200); }
+export const telHref = (p) => 'tel:' + String(p).replace(/[^\d+]/g, '');
+
+export function layout({ page = '', overDark = false } = {}) {
+  document.documentElement.classList.add('js');
+  const links = [['index.html', 'Головна', 'home'], ['catalog.html', 'Об’єкти', 'catalog'], ['about.html', 'Про нас', 'about'], ['index.html#contacts', 'Контакти', 'contacts']];
+  const nav = links.map(([h, t, k]) => `<a href="${h}"${k === page ? ' aria-current="page"' : ''}>${t}</a>`).join('');
+  const phone = S.phones?.[0];
+  const logo = `<a class="logo" href="index.html" aria-label="${esc(S.name)} — на головну"><img class="on-light" src="${S.logo}" alt="${esc(S.name)}"><img class="on-dark" src="${S.logoLight}" alt=""></a>`;
+  document.body.insertAdjacentHTML('afterbegin', `
+  <header class="hdr${overDark ? ' over-dark' : ' always'}"><div class="wrap">${logo}<nav class="nav" aria-label="Меню">${nav}</nav>
+    ${phone ? `<a class="hdr-phone" href="${telHref(phone)}">${esc(phone)}</a>` : ''}
+    <a class="btn sm" href="catalog.html">Знайти житло</a>
+    <button class="burger" aria-label="Меню" aria-expanded="false"><span></span><span></span></button></div></header>
+  <nav class="drawer" aria-label="Мобільне меню">${links.map(([h, t]) => `<a class="big" href="${h}">${t}</a>`).join('')}
+    ${phone ? `<a class="btn" href="${telHref(phone)}">${I.phone}${esc(phone)}</a>` : ''}<small>${esc(S.region || '')}</small></nav>`);
+  document.body.insertAdjacentHTML('beforeend', `
+  <footer class="ftr"><div class="wrap"><div class="ftr-grid">
+    <div><a class="logo" href="index.html"><img src="${S.logoLight}" alt="${esc(S.name)}" style="height:calc(var(--logo-h,44px) * 1.1)"></a><p>${esc(S.footerText)}</p></div>
+    <div><h5>Об’єкти</h5><ul>${TYPES.map((t) => `<li><a href="catalog.html?type=${encodeURIComponent(t.id)}">${t.label}</a></li>`).join('')}</ul></div>
+    <div><h5>Компанія</h5><ul><li><a href="about.html">Про нас</a></li><li><a href="about.html#process">Як ми працюємо</a></li><li><a href="about.html#faq">Питання і відповіді</a></li><li><a href="index.html#contacts">Контакти</a></li></ul></div>
+    <div><h5>Контакти</h5><ul>${(S.phones || []).map((p) => `<li><a href="${telHref(p)}">${esc(p)}</a></li>`).join('')}${S.email ? `<li><a href="mailto:${esc(S.email)}">${esc(S.email)}</a></li>` : ''}${S.instagram ? `<li><a href="https://instagram.com/${esc(S.instagram)}" target="_blank" rel="noopener">@${esc(S.instagram)}</a></li>` : ''}<li>${esc(S.region || '')}</li></ul></div>
+  </div><div class="ftr-bottom"><span>© ${new Date().getFullYear()} ${esc(S.name)}. Усі права захищені.</span><a href="admin.html">Вхід для менеджера</a></div></div></footer>`);
+
+  const hdr = $('.hdr'); const burger = $('.burger');
+  const setMenu = (o) => { document.body.classList.toggle('menu-open', o); burger.setAttribute('aria-expanded', o); };
+  burger.onclick = () => setMenu(!document.body.classList.contains('menu-open'));
+  $$('.drawer a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+  let last = 0;
+  const onScroll = () => {
+    const y = scrollY;
+    hdr.classList.toggle('solid', y > 30);
+    hdr.classList.toggle('hide', y > 500 && y > last && !document.body.classList.contains('menu-open'));
+    last = y;
+  };
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  reveal();
+}
+
+const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
+export function reveal(root = document) { $$('.rv:not(.in), .rv-img:not(.in)', root).forEach((el) => (io ? io.observe(el) : el.classList.add('in'))); }

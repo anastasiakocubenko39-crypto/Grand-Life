@@ -1,209 +1,106 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Про нас — Grand Life</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="stylesheet" href="about.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Про нас — Гранд Лайф</title>
+<meta name="description" content="Квартири, будинки, земельні ділянки, оренда і комерційна нерухомість у Києві та Київській області. Юридичний супровід угоди з 2017 року.">
+<link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="assets/app.css">
+<script src="config.js"></script>
 </head>
 <body>
+<main>
+  <section class="phead">
+    <div class="wrap split" style="align-items:end;gap:60px">
+      <div><div class="crumbs"><a href="index.html">Головна</a><span>/</span><span>Про нас</span></div><h1 class="h1 rv" id="aTitle"></h1></div>
+      <p class="lead rv" style="--d:.15s" id="aIntro"></p>
+    </div>
+  </section>
 
-<header class="header">
-  <div class="logo" onclick="location.href='index.html'">
-    <img src="logo.png.png" alt="Grand Life">
-    <span class="logo-text">Grand <em>Life</em></span>
-  </div>
-  <nav class="desktop-nav">
-    <a href="index.html">Головна</a>
-    <a href="catalog.html">Об'єкти</a>
-    <a href="about.html" style="color:var(--gold)">Про нас</a>
-    <a href="index.html#contacts">Контакти</a>
-  </nav>
-  <button class="burger" id="burgerBtn"><span></span><span></span><span></span></button>
-</header>
+  <section class="sec" style="padding-top:70px">
+    <div class="wrap">
+      <div class="stats" id="aStats"></div>
+    </div>
+  </section>
 
-<div class="menu-overlay" id="menuOverlay"></div>
-<nav class="side-menu" id="sideMenu">
-  <button class="close-menu" id="closeMenu">×</button>
-  <div class="side-menu-links">
-    <a href="index.html"><span class="link-num">01</span>Головна</a>
-    <a href="catalog.html"><span class="link-num">02</span>Об'єкти</a>
-    <a href="about.html"><span class="link-num">03</span>Про нас</a>
-    <a href="index.html#contacts"><span class="link-num">04</span>Контакти</a>
-  </div>
-  <div class="side-menu-footer">
-    <p>📍 Київ та область</p>
-    <p>📞 <a href="tel:+380000000000">+38 000 000 00 00</a></p>
-  </div>
-</nav>
+  <section class="sec tint">
+    <div class="wrap split">
+      <div class="split-img rv-img"><img id="aImg" alt="" loading="lazy"></div>
+      <div><span class="kicker rv">Наша історія</span><h2 class="h2 rv" style="margin:14px 0 22px" id="aStoryTitle"></h2><div class="desc" id="aStory"></div></div>
+    </div>
+  </section>
 
-<!-- HERO -->
-<section class="about-hero">
-  <div class="about-hero-inner">
-    <div class="about-hero-text">
-      <div class="section-tag">Про компанію</div>
-      <h1>Grand <em>Life</em></h1>
-      <p class="about-subtitle">Агентство нерухомості з досвідом та репутацією</p>
-      <div class="about-founded">
-        <span class="founded-year">2017</span>
-        <span class="founded-label">рік заснування</span>
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker rv">Цінності</span><h2 class="h2 rv">На чому ми <em>тримаємося</em></h2></div></div>
+      <div class="values" id="aValues"></div>
+    </div>
+  </section>
+
+  <section class="sec dark">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker rv">Послуги</span><h2 class="h2 rv">Що ми <em>робимо для вас</em></h2></div></div>
+      <div class="feats rv" id="aServices"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="team">
+    <div class="wrap team">
+      <div class="team-photo rv-img" id="tPhoto"></div>
+      <div>
+        <span class="kicker rv">Команда</span>
+        <h2 class="h2 rv" style="margin:14px 0 8px" id="tName"></h2>
+        <p class="rv" style="color:var(--accent-ink);font-weight:600;margin:0 0 18px" id="tRole"></p>
+        <p class="lead rv" id="tText"></p>
+        <div class="rv" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px" id="tActions"></div>
       </div>
     </div>
-    <div class="about-hero-img">
-      <img src="hero.png" alt="Grand Life нерухомість"
-           onerror="this.src='hero.jpg'"
-           class="about-main-photo">
-      <div class="about-img-badge">
-        <span>8</span>
-        <small>років<br>на ринку</small>
-      </div>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- STATS -->
-<section class="about-stats">
-  <div class="about-stats-inner">
-    <div class="astat">
-      <span class="astat-num">120+</span>
-      <span class="astat-label">Об'єктів продано</span>
+  <section class="sec tint" id="process">
+    <div class="wrap">
+      <div class="sec-head"><div><span class="kicker rv">Як ми працюємо</span><h2 class="h2 rv">Прозорий процес <em>на кожному кроці</em></h2></div></div>
+      <div class="steps" id="aSteps"></div>
     </div>
-    <div class="astat-div"></div>
-    <div class="astat">
-      <span class="astat-num">8</span>
-      <span class="astat-label">Років досвіду</span>
-    </div>
-    <div class="astat-div"></div>
-    <div class="astat">
-      <span class="astat-num">98%</span>
-      <span class="astat-label">Задоволених клієнтів</span>
-    </div>
-    <div class="astat-div"></div>
-    <div class="astat">
-      <span class="astat-num">50+</span>
-      <span class="astat-label">Партнерів</span>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- ПРО КОМПАНІЮ -->
-<section class="about-section">
-  <div class="about-section-inner">
-    <div class="about-text-block">
-      <div class="section-tag">Наша історія</div>
-      <h2>Хто ми<br><em>такі</em></h2>
-      <p>
-        Grand Life — агентство нерухомості, засноване у 2017 році.
-        За 8 років роботи ми допомогли сотням сімей знайти свій дім,
-        вигідно продати або орендувати нерухомість у Києві та Київській області.
-      </p>
-      <p>
-        Ми працюємо з квартирами, будинками, земельними ділянками
-        та комерційною нерухомістю. Кожен клієнт отримує індивідуальний
-        підхід та повний юридичний супровід угоди.
-      </p>
-
-      <div class="about-address">
-        <div class="address-icon">📍</div>
-        <div>
-          <strong>Юридична адреса</strong>
-          <p><!-- ДОДАЙТЕ АДРЕСУ ТУТ --><span class="placeholder-text">[Вкажіть юридичну адресу]</span></p>
-        </div>
-      </div>
+  <section class="sec" id="faq">
+    <div class="wrap split" style="align-items:start">
+      <div><span class="kicker rv">Питання</span><h2 class="h2 rv" style="margin-top:14px">Часті <em>запитання</em></h2><p class="lead rv" style="margin-top:18px">Не знайшли відповідь? Зателефонуйте — пояснимо все за 5 хвилин.</p></div>
+      <div class="faq" id="aFaq"></div>
     </div>
+  </section>
 
-    <div class="about-values">
-      <div class="value-card">
-        <div class="value-icon">🤝</div>
-        <h4>Чесність</h4>
-        <p>Прозорі умови співпраці без прихованих комісій та зборів.</p>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">⚡</div>
-        <h4>Швидкість</h4>
-        <p>Середній час продажу об'єкта — 3 тижні завдяки широкій базі покупців.</p>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">📋</div>
-        <h4>Юридична чистота</h4>
-        <p>Повна перевірка документів та супровід угоди від початку до кінця.</p>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">🏆</div>
-        <h4>Досвід</h4>
-        <p>8 років на ринку нерухомості Київщини. Знаємо ринок зсередини.</p>
-      </div>
+  <section class="wrap">
+    <div class="cta rv">
+      <div><span class="kicker">Співпраця</span><h2 class="h2" style="margin:16px 0">Готові <em>почати?</em></h2><p>Розкажіть, що шукаєте або що хочете продати — запропонуємо план і перші варіанти вже сьогодні.</p></div>
+      <div class="cta-actions" id="aCta"></div>
     </div>
-  </div>
-</section>
-
-<!-- КОМАНДА -->
-<section class="team-section">
-  <div class="team-inner">
-    <div class="section-tag" style="text-align:center">Команда</div>
-    <h2 style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,52px);font-weight:700;margin-bottom:48px">
-      Люди, яким<br><em style="color:var(--gold);font-style:italic">можна довіряти</em>
-    </h2>
-
-    <div class="team-grid">
-      <!-- КЕРІВНИК — ДОДАЙТЕ ФОТО ТА ІМ'Я -->
-      <div class="team-card team-card-main">
-        <div class="team-photo">
-          <img src="<!-- ФОТО КЕРІВНИКА -->"
-               alt="Керівник"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-          <div class="team-photo-placeholder">
-            <span>👤</span>
-            <small>Додайте фото</small>
-          </div>
-        </div>
-        <div class="team-info">
-          <h3><!-- ІМ'Я КЕРІВНИКА --><span class="placeholder-text">[Ім'я та прізвище]</span></h3>
-          <span class="team-role">Засновник та керівник</span>
-          <p>Досвід у нерухомості понад 8 років. Особисто супроводжує кожну угоду.</p>
-          <div class="team-contacts">
-            <a href="tel:+380000000000" class="team-contact-btn">📞 Зателефонувати</a>
-            <a href="https://www.instagram.com/grand_life_agency?igsh=MTNucjdyOHA2NWUwbQ==" target="_blank" class="team-contact-btn">📷 Instagram</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- КОНТАКТИ CTA -->
-<section class="about-cta">
-  <div class="about-cta-inner">
-    <h2>Готові співпрацювати?</h2>
-    <p>Зв'яжіться з нами — відповімо на всі питання та підберемо найкращий варіант</p>
-    <div class="cta-btns">
-      <a href="index.html#contacts" class="btn-main">Зв'язатися з нами</a>
-      <a href="catalog.html" class="btn-ghost">Переглянути об'єкти</a>
-    </div>
-  </div>
-</section>
-
-<footer class="footer">
-  <div class="footer-inner">
-    <div class="logo" onclick="location.href='index.html'">
-      <img src="logo.png.png" alt="Grand Life">
-      <span class="logo-text">Grand <em>Life</em></span>
-    </div>
-    <p class="footer-copy">© 2025 Grand Life. Всі права захищені.</p>
-    <div class="footer-links">
-      <a href="index.html">Головна</a>
-      <a href="catalog.html">Об'єкти</a>
-      <a href="about.html">Про нас</a>
-      <a href="index.html#contacts">Контакти</a>
-    </div>
-  </div>
-</footer>
-
-<script src="script.js"></script>
-<script src="about.js"></script>
+  </section>
+</main>
+<script type="module">
+import { S, I, esc, layout, reveal, telHref, $ } from './assets/core.js';
+layout({ page: 'about' });
+const A = S.about;
+$('#aTitle').innerHTML = A.title; $('#aIntro').textContent = A.intro;
+$('#aStats').innerHTML = A.stats.map(([b, s], i) => `<div class="stat rv" style="--d:${i * .08}s"><b>${esc(b)}</b><span>${esc(s)}</span></div>`).join('');
+$('#aImg').src = A.image; $('#aStoryTitle').innerHTML = A.storyTitle;
+$('#aStory').innerHTML = A.story.map((p) => `<p class="rv">${esc(p)}</p>`).join('');
+$('#aValues').innerHTML = A.values.map(([h, p], i) => `<div class="value rv" style="--d:${(i % 2) * .08}s"><h4>${esc(h)}</h4><p>${esc(p)}</p></div>`).join('');
+$('#aServices').innerHTML = A.services.map(([ic, h, p]) => `<div class="feat"><div class="ic">${I[ic]}</div><h4>${esc(h)}</h4><p>${esc(p)}</p></div>`).join('');
+const T = A.team;
+$('#tPhoto').innerHTML = T.photo ? `<img src="${T.photo}" alt="${esc(T.name)}" style="width:100%;height:100%;object-fit:cover">` : `<img class="mark" src="${S.markLight}" alt="">`;
+$('#tName').textContent = T.name; $('#tRole').textContent = T.role; $('#tText').textContent = T.text;
+const phone = S.phones?.[0];
+$('#tActions').innerHTML = (phone ? `<a class="btn" href="${telHref(phone)}">${I.phone}Зателефонувати</a>` : '') + (S.instagram ? `<a class="btn line" href="https://instagram.com/${esc(S.instagram)}" target="_blank" rel="noopener">${I.insta}Instagram</a>` : '') + (S.telegram ? `<a class="btn line" href="${esc(S.telegram)}" target="_blank" rel="noopener">${I.tg}Telegram</a>` : '');
+$('#aSteps').innerHTML = S.steps.map(([h, p], i) => `<div class="step rv" style="--d:${i * .08}s"><h4>${esc(h)}</h4><p>${esc(p)}</p></div>`).join('');
+$('#aFaq').innerHTML = A.faq.map(([q, a], i) => `<details class="rv"${i ? '' : ' open'}><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
+$('#aCta').innerHTML = `<div class="contact-list">${(S.phones || []).map((p) => `<a href="${telHref(p)}">${I.phone}${esc(p)}</a>`).join('')}${S.email ? `<a href="mailto:${esc(S.email)}">${I.mail}${esc(S.email)}</a>` : ''}<a>${I.pin}${esc(S.region)}</a></div><a class="btn" href="catalog.html" style="margin-top:12px">Переглянути об’єкти</a>`;
+reveal();
+</script>
 </body>
 </html>

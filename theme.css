@@ -1,0 +1,16 @@
+/* Grand Life — глибокий синій, золото, білий */
+:root {
+  --bg: #FFFFFF; --surface: #FFFFFF; --surface-2: #F4F6FA;
+  --ink: #2A3342; --heading: #0E1E3F; --muted: #667085;
+  --line: #E4E8EF; --line-strong: #CFD6E2;
+  --accent: #C9A24B; --accent-ink: #9A7A2E; --accent-soft: rgba(201, 162, 75, .14); --on-accent: #0E1E3F; --accent-shadow: rgba(201, 162, 75, .6);
+  --dark: #0E1E3F; --on-dark: #FFFFFF; --hero-em: #E2C27A;
+  --hero-overlay: linear-gradient(90deg, rgba(8, 18, 42, .9) 0%, rgba(8, 18, 42, .62) 42%, rgba(8, 18, 42, .1) 75%), linear-gradient(0deg, rgba(8, 18, 42, .7), transparent 45%);
+  --footer-bg: #0A1630; --footer-ink: rgba(255, 255, 255, .78);
+  --display: 'Playfair Display', Georgia, serif; --display-weight: 500; --em-style: italic;
+  --sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --card-radius: 18px; --btn-radius: 12px; --logo-h: 50px;
+  --ease: cubic-bezier(.22, .7, .15, 1);
+}
+.btn { font-weight: 600; }
+.btn.dark:hover { box-shadow: 0 16px 32px -16px rgba(14, 30, 63, .6); }

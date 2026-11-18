@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Об’єкт — Гранд Лайф</title>
+<meta name="description" content="Повний опис об’єкта нерухомості: фото, характеристики, ціна, розташування.">
+<link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="assets/app.css">
+<script src="config.js"></script>
+</head>
+<body class="has-bar">
+<main class="obj"><div class="wrap" id="root"><div class="skeleton" style="min-height:520px;margin-top:30px"></div></div></main>
+<div class="lightbox" id="lb" aria-hidden="true" role="dialog" aria-label="Фото об’єкта">
+  <div class="lb-top"><span id="lbCount"></span><button class="lb-close" id="lbClose" aria-label="Закрити"></button></div>
+  <div class="lb-stage" id="lbStage"><img id="lbImg" alt=""><button class="lb-btn lb-prev" id="lbPrev" aria-label="Попереднє"></button><button class="lb-btn lb-next" id="lbNext" aria-label="Наступне"></button></div>
+  <div class="lb-thumbs" id="lbThumbs"></div>
+</div>
+<script type="module">
+import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js';
+layout({ page: 'catalog' });
+$('#lbClose').innerHTML = I.x; $('#lbPrev').innerHTML = I.left; $('#lbNext').innerHTML = I.right;
+const id = new URLSearchParams(location.search).get('id');
+const root = $('#root');
+let p = null, all = [];
+try { [p, all] = await Promise.all([id ? store.one(id) : null, store.all()]); } catch (e) { console.error(e); }
+
+if (!p) {
+  root.innerHTML = `<div class="empty" style="margin-top:40px"><b>Об’єкт не знайдено</b>Можливо, його вже продано або знято з продажу. <a href="catalog.html">Перейти до каталогу</a></div>`;
+} else render();
+
+function render() {
+  document.title = `${p.title} — ${S.name}`;
+  const imgs = p.images;
+  const t = TYPE[p.type];
+  const isLand = p.type === 'Ділянка';
+  const perM2 = p.priceValue && p.areaValue && p.type !== 'Оренда' ? (p.areaUnit === 'м²' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за м²` : p.areaUnit === 'сот' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за сотку` : '') : '';
+  const gal = imgs.length
+    ? `<div class="gallery${imgs.length === 1 ? ' one' : imgs.length === 2 ? ' two' : ''}">${imgs.slice(0, 3).map((src, i) => `<button data-i="${i}" aria-label="Відкрити фото ${i + 1}"><img src="${esc(src)}" alt="${esc(p.title)} — фото ${i + 1}"${i ? ' loading="lazy"' : ''}>${i === 2 && imgs.length > 3 ? `<span class="more">+${imgs.length - 3} фото</span>` : ''}${i === 0 && imgs.length > 1 ? `<span class="pcount count-m">${I.photo}${imgs.length}</span>` : ''}</button>`).join('')}</div>`
+    : `<div class="gallery one"><div class="noimg" style="background:var(--surface-2)"><img src="${S.mark}" alt=""></div></div>`;
+
+  const key = [
+    [esc(priceText(p)), p.type === 'Оренда' ? 'оренда на місяць' : 'ціна'],
+    [areaText(p), isLand ? 'площа ділянки' : 'загальна площа'],
+    !isLand && p.roomsNum && [p.roomsNum, 'кімнат'],
+    !isLand && p.floor && [`${esc(p.floor)}${p.floors ? ' / ' + esc(p.floors) : ''}`, 'поверх'],
+    isLand && p.purpose && [esc(shortPurpose(p.purpose)), 'призначення'],
+    p.landArea && !isLand && [`${esc(p.landArea)} сот`, 'ділянка'],
+    p.year && [esc(p.year), 'рік будівництва'],
+  ].filter((x) => x && x[0]).slice(0, 4);
+
+  const rows = [
+    ['Тип', t.one], ['Угода', p.type === 'Оренда' ? 'Довгострокова оренда' : 'Продаж'],
+    ['Локація', p.location], ['Адреса', p.address], ['Житловий комплекс / масив', p.complex],
+    ['Загальна площа', areaText(p)], ['Житлова площа', p.livingArea && p.livingArea + ' м²'], ['Площа кухні', p.kitchenArea && p.kitchenArea + ' м²'],
+    ['Площа ділянки', !isLand && p.landArea && p.landArea + ' сот'],
+    ['Кімнат', !isLand && p.rooms], ['Спалень', p.bedrooms], ['Санвузлів', p.bathrooms],
+    ['Поверх', p.floor], ['Поверховість', p.floors], ['Рік будівництва / здачі', p.year],
+    ['Стан', p.condition], ['Матеріал стін', p.walls], ['Опалення', p.heating], ['Висота стель', p.ceiling && p.ceiling + ' м'],
+    ['Цільове призначення', p.purpose], ['Кадастровий номер', p.cadastre],
+    ['Ціна', priceText(p)], ['Ціна за одиницю', perM2], ['Умови оплати', p.priceNote],
+    ['Мінімальний строк оренди', p.rentTerm], ['Застава / комісія', p.deposit],
+    ['Доступний з', p.available], ['Код об’єкта', p.code || p.id.slice(0, 6).toUpperCase()],
+  ].filter(([, v]) => v !== undefined && v !== null && String(v).trim() && v !== '—');
+
+  const para = (x) => { const [first, ...rest] = x.split('\n'); return rest.length && first.length < 48 && !/[.!?:]$/.test(first) ? `<h3 class="dh">${esc(first)}</h3><p>${esc(rest.join('\n'))}</p>` : `<p>${esc(x)}</p>`; };
+  const paras = String(p.description || '').split(/\n{2,}/).map((x) => x.trim()).filter(Boolean);
+  const mapQ = encodeURIComponent([p.address, p.location].filter(Boolean).join(', '));
+  const phone = S.phones?.[0];
+  const msg = encodeURIComponent(`Добрий день! Цікавить об’єкт «${p.title}» (${location.href})`);
+
+  root.innerHTML = `
+    <div class="crumbs rv" style="margin-top:12px"><a href="index.html">Головна</a><span>/</span><a href="catalog.html?type=${encodeURIComponent(p.type)}">${esc(t.label)}</a><span>/</span><span>${esc(p.title)}</span></div>
+    ${gal}
+    <div class="obj-grid">
+      <article>
+        <div class="obj-title rv"><span class="badge">${esc(t.one)}</span>${p.featured ? `<span class="badge">${esc(S.featuredLabel || 'Ексклюзив')}</span>` : ''}${p.sold ? `<span class="badge sold">${p.type === 'Оренда' ? 'Здано' : 'Продано'}</span>` : ''}</div>
+        <h1 class="h1 rv">${esc(p.title)}</h1>
+        ${p.location ? `<div class="loc rv">${I.pin}<span>${esc([p.address, p.location].filter(Boolean).join(', '))}</span></div>` : ''}
+        ${key.length ? `<div class="keyfacts rv">${key.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>` : ''}
+        <section class="block rv"><h2>Опис</h2><div class="desc" id="desc">${paras.length ? paras.map(para).join('') : '<p>Детальний опис уточнюйте у менеджера — розповімо все про об’єкт і організуємо перегляд.</p>'}</div>
+          <button class="link" id="more" hidden style="background:none;border:0;border-bottom:1px solid var(--accent);cursor:pointer;margin-top:12px">Читати повністю</button></section>
+        <section class="block rv"><h2>Характеристики</h2><div class="spec-table">${rows.map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div></section>
+        ${p.features.length ? `<section class="block rv"><h2>Переваги та зручності</h2><div class="feat-list">${p.features.map((f) => `<span>${I.tick}${esc(f)}</span>`).join('')}</div></section>` : ''}
+        ${p.infrastructure ? `<section class="block rv"><h2>Інфраструктура поруч</h2><div class="desc"><p>${esc(p.infrastructure)}</p></div></section>` : ''}
+        ${mapQ ? `<section class="block rv"><h2>Розташування</h2><a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener">${I.pin}<div><b>${esc([p.address, p.location].filter(Boolean).join(', '))}</b><span>Відкрити на Google Maps</span></div></a></section>` : ''}
+        ${p.videoUrl ? `<section class="block rv"><h2>Відео</h2><a class="map-link" href="${esc(p.videoUrl)}" target="_blank" rel="noopener">${I.photo}<div><b>Відеоогляд об’єкта</b><span>Відкрити відео</span></div></a></section>` : ''}
+      </article>
+      <aside class="side">
+        <div class="side-card rv">
+          ${priceHTML(p)}
+          ${perM2 ? `<div class="per">${perM2}</div>` : ''}
+          ${p.priceNote ? `<div class="per">${esc(p.priceNote)}</div>` : ''}
+          <hr>
+          <div class="agent"><div class="av"><img src="${S.markLight}" alt=""></div><div><b>${esc(S.agentName || S.name)}</b><span>${esc(S.agentRole || 'Ваш менеджер')}</span></div></div>
+          <div class="side-actions">
+            ${phone ? `<a class="btn block" href="${telHref(phone)}">${I.phone}${esc(phone)}</a>` : ''}
+            <div class="row">
+              <a class="btn line sm" href="viber://chat?number=${encodeURIComponent((phone || '').replace(/[^\d+]/g, ''))}">Viber</a>
+              ${S.telegram ? `<a class="btn line sm" href="${esc(S.telegram)}" target="_blank" rel="noopener">Telegram</a>` : S.instagram ? `<a class="btn line sm" href="https://instagram.com/${esc(S.instagram)}" target="_blank" rel="noopener">Instagram</a>` : ''}
+            </div>
+            ${S.email ? `<a class="btn line sm" href="mailto:${esc(S.email)}?subject=${encodeURIComponent(p.title)}&body=${msg}">${I.mail}Написати на email</a>` : ''}
+            <button class="btn line sm" id="share">${I.share}Поділитися</button>
+          </div>
+        </div>
+        ${p.priceValue && p.type !== 'Оренда' && !p.sold ? `<div class="side-card rv calc" id="calc">
+          <b style="font-size:17px;color:var(--heading)">Розрахунок іпотеки</b>
+          <label>Перший внесок: <span id="cDownT"></span><input type="range" id="cDown" min="10" max="70" value="30" step="5"></label>
+          <label>Строк: <span id="cYearsT"></span><input type="range" id="cYears" min="1" max="20" value="10"></label>
+          <label>Ставка: <span id="cRateT"></span><input type="range" id="cRate" min="3" max="25" value="${S.mortgageRate || 7}" step="0.5"></label>
+          <div><span style="font-size:13px;color:var(--muted)">Щомісячний платіж</span><output id="cOut"></output></div>
+          <span style="font-size:12px;color:var(--muted)">Орієнтовно. Точні умови — у банку, допоможемо з оформленням.</span>
+        </div>` : ''}
+      </aside>
+    </div>
+    ${(() => { const sim = all.filter((x) => x.id !== p.id && x.type === p.type && !x.sold).slice(0, 3); return sim.length ? `<section class="block" style="margin-top:40px"><h2>Схожі об’єкти</h2><div class="grid">${sim.map(cardHTML).join('')}</div></section>` : ''; })()}`;
+
+  document.body.insertAdjacentHTML('beforeend', `<div class="mobile-bar">${phone ? `<a class="btn" href="${telHref(phone)}">${I.phone}Подзвонити</a>` : ''}<a class="btn line" href="viber://chat?number=${encodeURIComponent((phone || '').replace(/[^\d+]/g, ''))}">Viber</a></div>`);
+
+  const d = $('#desc');
+  if (d.scrollHeight > 460) { d.classList.add('clamped'); $('#more').hidden = false; $('#more').onclick = () => { d.classList.remove('clamped'); $('#more').hidden = true; }; }
+  $('#share').onclick = async () => { if (navigator.share) { try { await navigator.share({ title: p.title, url: location.href }); } catch {} } else { try { await navigator.clipboard.writeText(location.href); toast('Посилання скопійовано'); } catch {} } };
+
+  if ($('#calc')) {
+    const upd = () => {
+      const down = +$('#cDown').value, years = +$('#cYears').value, rate = +$('#cRate').value / 100 / 12, n = years * 12;
+      const loan = p.priceValue * (1 - down / 100);
+      const pay = rate ? loan * rate / (1 - Math.pow(1 + rate, -n)) : loan / n;
+      $('#cDownT').textContent = `${down}% · ${p.currency}${fmt(p.priceValue * down / 100)}`;
+      $('#cYearsT').textContent = `${years} р.`; $('#cRateT').textContent = `${$('#cRate').value}% річних`;
+      $('#cOut').textContent = `${p.currency}${fmt(pay)}`;
+    };
+    $$('#calc input').forEach((i) => (i.oninput = upd)); upd();
+  }
+
+  // lightbox
+  const lb = $('#lb'); let cur = 0;
+  $('#lbThumbs').innerHTML = imgs.map((s, i) => `<button data-i="${i}" aria-label="Фото ${i + 1}"><img src="${esc(s)}" alt="" loading="lazy"></button>`).join('');
+  const show = (i) => { cur = (i + imgs.length) % imgs.length; $('#lbImg').src = imgs[cur]; $('#lbCount').textContent = `${cur + 1} / ${imgs.length}`; $$('#lbThumbs button').forEach((b, k) => b.toggleAttribute('aria-current', k === cur)); $$('#lbThumbs button')[cur]?.scrollIntoView({ inline: 'center', block: 'nearest' }); };
+  const open = (i) => { if (!imgs.length) return; show(i); lb.classList.add('open'); lb.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; };
+  const close = () => { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; };
+  $$('.gallery button').forEach((b) => (b.onclick = () => open(+b.dataset.i)));
+  $('#lbThumbs').onclick = (e) => { const b = e.target.closest('button'); if (b) show(+b.dataset.i); };
+  $('#lbPrev').onclick = () => show(cur - 1); $('#lbNext').onclick = () => show(cur + 1); $('#lbClose').onclick = close;
+  addEventListener('keydown', (e) => { if (!lb.classList.contains('open')) return; if (e.key === 'Escape') close(); if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'ArrowRight') show(cur + 1); });
+  let x0 = null; $('#lbStage').addEventListener('touchstart', (e) => (x0 = e.touches[0].clientX), { passive: true });
+  $('#lbStage').addEventListener('touchend', (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) show(cur + (dx < 0 ? 1 : -1)); x0 = null; });
+  $('#lbStage').addEventListener('click', (e) => { if (e.target.id === 'lbStage') close(); });
+  reveal();
+}
+</script>
+</body>
+</html>
