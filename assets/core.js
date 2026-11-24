@@ -157,6 +157,12 @@ export const store = {
     const cur = check(await sb.from(TABLE).select('data').eq('id', id).single());
     const d = await withPhotos(id, data);
     check(await sb.from(TABLE).update({ data: { ...cur.data, ...d, updatedAt: new Date().toISOString() } }).eq('id', id));
+    if ('images' in d) { // прибрати зі сховища фото, які видалили з об'єкта
+      const keep = new Set(d.images.map((u) => decodeURIComponent(String(u).split(`/${BUCKET}/`)[1] || '')));
+      const files = (await sb.storage.from(BUCKET).list(id)).data || [];
+      const gone = files.map((f) => `${id}/${f.name}`).filter((f) => !keep.has(f));
+      if (gone.length) await sb.storage.from(BUCKET).remove(gone);
+    }
   },
   async remove(id) {
     if (!S.supabase) { demoSave((await demoAll()).filter((x) => x.id !== id)); return; }

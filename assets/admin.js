@@ -37,7 +37,7 @@ async function auth() {
   }
   supa = await getSupa();
   const allowed = (S.adminEmails || []).map((e) => e.toLowerCase());
-  const ok = (sess) => sess && allowed.includes(sess.user.email.toLowerCase());
+  const ok = (sess) => !!sess && allowed.includes(String(sess.user?.email || '').toLowerCase());
   $('#lForm').innerHTML = `<p>Введіть робочу пошту — надішлемо посилання для входу. Пароль не потрібен.</p>
     <label class="f"><span>Email</span><input class="field" id="lEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
     <button class="btn block" id="lSend" style="margin-top:14px">Надіслати посилання</button><p class="err" id="lErr"></p>`;
@@ -51,15 +51,23 @@ async function auth() {
     else $('#lForm').innerHTML = `<p>Готово! Перевірте пошту <b>${esc(email)}</b> і натисніть посилання в листі — панель відкриється автоматично.</p><div class="note">Лист може потрапити в «Спам» або «Промоакції».</div>`;
   };
   $('#lSend').onclick = send; $('#lEmail').onkeydown = (e) => { if (e.key === 'Enter') send(); };
+  // Посилання з листа прострочене або вже використане — Supabase повертає помилку в адресі.
+  const linkErr = new URLSearchParams(location.hash.slice(1) || location.search).get('error_description');
+  if (linkErr) { $('#lErr').textContent = 'Посилання для входу не спрацювало (' + linkErr.replace(/\+/g, ' ') + '). Надішліть нове.'; history.replaceState(null, '', location.pathname); }
   const { data } = await supa.auth.getSession();
   if (ok(data.session)) start(data.session.user.email);
+  else if (data.session) { $('#lErr').textContent = `Ви увійшли як ${data.session.user.email || 'інший користувач'} — ця адреса не має доступу до панелі.`; await supa.auth.signOut(); }
   supa.auth.onAuthStateChange((_e, sess) => { if (ok(sess) && $('#app').hidden) start(sess.user.email); });
   $('#logout').onclick = async () => { await supa.auth.signOut(); location.reload(); };
 }
 
 async function start(who) {
   $('#login').hidden = true; $('#app').hidden = false; $('#who').textContent = who;
-  await reload(); showList();
+  try { await reload(); showList(); }
+  catch (e) {
+    console.error(e);
+    $('#main').innerHTML = `<div class="empty"><b>Не вдалося завантажити об’єкти</b>${esc(e.message)}<br><br>Перевірте інтернет і оновіть сторінку. Якщо помилка про таблицю grandlife_properties — у Supabase не виконано файл supabase/schema.sql.</div>`;
+  }
 }
 async function reload() { RAW = await store.raw(); }
 
