@@ -179,7 +179,7 @@ export const telHref = (p) => 'tel:' + String(p).replace(/[^\d+]/g, '');
 
 export function layout({ page = '', overDark = false } = {}) {
   document.documentElement.classList.add('js');
-  const links = [['index.html', 'Головна', 'home'], ['catalog.html', 'Об’єкти', 'catalog'], ['about.html', 'Про нас', 'about'], ['index.html#contacts', 'Контакти', 'contacts']];
+  const links = [['index.html', 'Головна', 'home'], ['catalog.html', 'Об’єкти', 'catalog'], ['about.html', 'Про нас', 'about'], ['index.html?to=contacts', 'Контакти', 'contacts']];
   const nav = links.map(([h, t, k]) => `<a href="${h}"${k === page ? ' aria-current="page"' : ''}>${t}</a>`).join('');
   const phone = S.phones?.[0];
   const logo = `<a class="logo" href="index.html" aria-label="${esc(S.name)} — на головну"><img class="on-light" src="${S.logo}" alt="${esc(S.name)}"><img class="on-dark" src="${S.logoLight}" alt=""></a>`;
@@ -194,7 +194,7 @@ export function layout({ page = '', overDark = false } = {}) {
   <footer class="ftr"><div class="wrap"><div class="ftr-grid">
     <div><a class="logo" href="index.html"><img src="${S.logoLight}" alt="${esc(S.name)}" style="height:calc(var(--logo-h,44px) * 1.1)"></a><p>${esc(S.footerText)}</p></div>
     <div><h5>Об’єкти</h5><ul>${TYPES.map((t) => `<li><a href="catalog.html?type=${encodeURIComponent(t.id)}">${t.label}</a></li>`).join('')}</ul></div>
-    <div><h5>Компанія</h5><ul><li><a href="about.html">Про нас</a></li><li><a href="about.html#process">Як ми працюємо</a></li><li><a href="about.html#faq">Питання і відповіді</a></li><li><a href="index.html#contacts">Контакти</a></li></ul></div>
+    <div><h5>Компанія</h5><ul><li><a href="about.html">Про нас</a></li><li><a href="about.html?to=process">Як ми працюємо</a></li><li><a href="about.html?to=faq">Питання і відповіді</a></li><li><a href="index.html?to=contacts">Контакти</a></li></ul></div>
     <div><h5>Контакти</h5><ul>${(S.phones || []).map((p) => `<li><a href="${telHref(p)}">${esc(p)}</a></li>`).join('')}${S.email ? `<li><a href="mailto:${esc(S.email)}">${esc(S.email)}</a></li>` : ''}${S.instagram ? `<li><a href="https://instagram.com/${esc(S.instagram)}" target="_blank" rel="noopener">@${esc(S.instagram)}</a></li>` : ''}<li>${esc(S.region || '')}</li></ul></div>
   </div><div class="ftr-bottom"><span>© ${new Date().getFullYear()} ${esc(S.name)}. Усі права захищені.</span><a href="admin.html">Вхід для менеджера</a></div></div></footer>`);
 
@@ -211,6 +211,27 @@ export function layout({ page = '', overDark = false } = {}) {
   };
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
   reveal();
+
+  /* Сторінка завжди відкривається зверху. До розділу (?to=contacts) гортаємо лише після кліку по меню. */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  const params = new URLSearchParams(location.search);
+  const target = params.get('to');
+  if (location.hash || target) {
+    params.delete('to');
+    const q = params.toString();
+    history.replaceState(null, '', location.pathname + (q ? '?' + q : ''));
+  }
+  scrollTo(0, 0);
+  if (target) setTimeout(() => document.getElementById(target)?.scrollIntoView({ behavior: 'smooth' }), 400);
+  const here = location.pathname.split('/').pop() || 'index.html';
+  $$('a[href*="?to="]').forEach((a) => {
+    const [file, q] = a.getAttribute('href').split('?');
+    if (file !== here) return;
+    a.addEventListener('click', (e) => {
+      const el = document.getElementById(new URLSearchParams(q).get('to'));
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
