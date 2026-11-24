@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, $, $$ } from './core.js';
+import { S, TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -35,8 +35,7 @@ async function auth() {
     $('#logout').onclick = () => { sessionStorage.removeItem('demoAdmin'); location.reload(); };
     return;
   }
-  await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'; s.onload = res; s.onerror = rej; document.head.append(s); });
-  supa = window.supabase.createClient(S.supabase.url, S.supabase.key);
+  supa = await getSupa();
   const allowed = (S.adminEmails || []).map((e) => e.toLowerCase());
   const ok = (sess) => sess && allowed.includes(sess.user.email.toLowerCase());
   $('#lForm').innerHTML = `<p>Введіть робочу пошту — надішлемо посилання для входу. Пароль не потрібен.</p>
@@ -64,6 +63,44 @@ async function start(who) {
 }
 async function reload() { RAW = await store.raw(); }
 
+/* ── одноразове перенесення з Firebase (Firestore REST, тільки читання) ── */
+function fsValue(v) {
+  if ('stringValue' in v) return v.stringValue;
+  if ('integerValue' in v) return Number(v.integerValue);
+  if ('doubleValue' in v) return v.doubleValue;
+  if ('booleanValue' in v) return v.booleanValue;
+  if ('timestampValue' in v) return v.timestampValue;
+  if ('nullValue' in v) return null;
+  if ('arrayValue' in v) return (v.arrayValue.values || []).map(fsValue);
+  if ('mapValue' in v) return fsFields(v.mapValue.fields || {});
+  return null;
+}
+const fsFields = (f) => Object.fromEntries(Object.entries(f).map(([k, v]) => [k, fsValue(v)]));
+async function importFirebase() {
+  const b = $('#importFb'); const fb = S.oldFirebase;
+  b.disabled = true; b.textContent = 'Читаємо Firebase…';
+  try {
+    const docs = []; let page = '';
+    do {
+      const u = `https://firestore.googleapis.com/v1/projects/${fb.projectId}/databases/(default)/documents/properties?pageSize=50&key=${fb.apiKey}${page ? '&pageToken=' + encodeURIComponent(page) : ''}`;
+      const r = await (await fetch(u)).json();
+      if (r.error) throw new Error(r.error.message);
+      (r.documents || []).forEach((d) => docs.push({ id: d.name.split('/').pop(), created: d.createTime, ...fsFields(d.fields || {}) }));
+      page = r.nextPageToken;
+    } while (page);
+    const have = new Set(RAW.map((d) => d.id));
+    const todo = docs.filter((d) => !have.has(d.id));
+    let done = 0;
+    for (const { id, created, updatedAt, ...d } of todo) {
+      b.textContent = `Переносимо ${done + 1} з ${todo.length}…`;
+      await store.add({ ...d, addedAt: d.addedAt || created }, id);
+      done++;
+    }
+    toast(todo.length ? `Перенесено об’єктів: ${done}` : 'Усі об’єкти вже перенесено');
+    await reload(); showList();
+  } catch (e) { console.error(e); alert('Не вдалося перенести: ' + e.message); b.disabled = false; b.textContent = 'Спробувати ще раз'; }
+}
+
 /* ── list ── */
 function showList() {
   view = 'list'; navCur('list');
@@ -71,6 +108,7 @@ function showList() {
   const active = P.filter((p) => !p.sold);
   $('#main').innerHTML = `
     <div class="adm-top"><h1>Об’єкти</h1><button class="btn" id="addBtn">${ICON.plus}Додати об’єкт</button></div>
+    ${S.oldFirebase && !store.demo ? `<div class="demo-note"><span>Перенесення зі старої бази Firebase: об’єкти, яких ще немає в Supabase, буде скопійовано разом із фото. Можна запускати повторно — дублікатів не буде.</span><button id="importFb">Перенести з Firebase</button></div>` : ''}
     ${store.demo ? `<div class="demo-note"><span>Демо-режим: зміни видно лише в цьому браузері.</span><button id="resetDemo">Повернути демо-об’єкти</button></div>` : ''}
     <div class="kpis">
       <div class="kpi"><b>${P.length}</b><span>усього об’єктів</span></div>
@@ -85,6 +123,7 @@ function showList() {
     </div>
     <div class="rows" id="rows"></div>`;
   $('#addBtn').onclick = () => openEditor(null);
+  $('#importFb')?.addEventListener('click', importFirebase);
   $('#resetDemo')?.addEventListener('click', async () => { if (confirm('Повернути початкові демо-об’єкти? Ваші зміни в демо буде скинуто.')) { store.resetDemo(); await reload(); showList(); } });
   const draw = () => {
     const q = filt.q.toLowerCase();

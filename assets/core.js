@@ -89,16 +89,36 @@ export const I = {
 };
 
 /* ── data ── */
-let fb = null;
-async function firebase() {
-  if (fb) return fb;
-  const [{ initializeApp }, fs] = await Promise.all([
-    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'),
-    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'),
-  ]);
-  const app = initializeApp(S.firebase);
-  fb = { fs, db: fs.getFirestore(app) };
-  return fb;
+/* База — Supabase: таблиця grandlife_properties (id, data jsonb, created_at), фото — бакет grandlife-photos. Схема: supabase/schema.sql */
+const TABLE = 'grandlife_properties';
+const BUCKET = 'grandlife-photos';
+let supaP = null;
+export function supa() {
+  if (!supaP) supaP = (async () => {
+    if (!window.supabase) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'; s.onload = res; s.onerror = rej; document.head.append(s); });
+    return window.supabase.createClient(S.supabase.url, S.supabase.key);
+  })();
+  return supaP;
+}
+const check = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
+const row = (r) => ({ ...r.data, id: r.id, addedAt: r.data?.addedAt || r.created_at });
+
+/* Фото у вигляді data:… завантажуються в Storage, у базі лишається лише посилання. */
+async function uploadImages(id, list) {
+  const sb = await supa();
+  return Promise.all((list || []).map(async (src) => {
+    if (!String(src).startsWith('data:image/')) return src;
+    const blob = await (await fetch(src)).blob();
+    const ext = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg';
+    const path = `${id}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    check(await sb.storage.from(BUCKET).upload(path, blob, { contentType: blob.type, cacheControl: '31536000' }));
+    return sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+  }));
+}
+async function withPhotos(id, data) {
+  if (!('images' in data)) return data;
+  const images = await uploadImages(id, data.images);
+  return { ...data, images, image: images[0] || '' };
 }
 const DEMO_KEY = (S.storageKey || 'realty') + '_props_v1';
 async function demoAll() {
@@ -110,40 +130,40 @@ async function demoAll() {
 const demoSave = (list) => { localStorage.setItem(DEMO_KEY, JSON.stringify(list)); };
 
 export const store = {
-  demo: !S.firebase,
+  demo: !S.supabase,
   async all() {
-    if (!S.firebase) return (await demoAll()).map((d) => norm(d.id, d));
-    const { fs, db } = await firebase();
-    const snap = await fs.getDocs(fs.collection(db, 'properties'));
-    return snap.docs.map((d) => norm(d.id, d.data()));
+    return (await store.raw()).map((d) => norm(d.id, d));
   },
   async one(id) {
-    if (!S.firebase) { const d = (await demoAll()).find((x) => x.id === id); return d ? norm(d.id, d) : null; }
-    const { fs, db } = await firebase();
-    const s = await fs.getDoc(fs.doc(db, 'properties', id));
-    return s.exists() ? norm(s.id, s.data()) : null;
+    if (!S.supabase) { const d = (await demoAll()).find((x) => x.id === id); return d ? norm(d.id, d) : null; }
+    const r = check(await (await supa()).from(TABLE).select('*').eq('id', id).maybeSingle());
+    return r ? norm(r.id, row(r)) : null;
   },
   async raw() {
-    if (!S.firebase) return demoAll();
-    const { fs, db } = await firebase();
-    const snap = await fs.getDocs(fs.collection(db, 'properties'));
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    if (!S.supabase) return demoAll();
+    return check(await (await supa()).from(TABLE).select('*').order('created_at', { ascending: false })).map(row);
   },
-  async add(data) {
-    if (!S.firebase) { const l = await demoAll(); const id = 'd' + Date.now().toString(36); l.unshift({ ...data, id, addedAt: new Date().toISOString() }); demoSave(l); return id; }
-    const { fs, db } = await firebase();
-    const r = await fs.addDoc(fs.collection(db, 'properties'), { ...data, addedAt: fs.serverTimestamp() });
-    return r.id;
+  /* id і addedAt можна передати явно — так переносимо об'єкти з Firebase зі старими посиланнями. */
+  async add(data, id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)) {
+    if (!S.supabase) { const l = await demoAll(); l.unshift({ ...data, id, addedAt: new Date().toISOString() }); demoSave(l); return id; }
+    const d = await withPhotos(id, data);
+    const created_at = d.addedAt || new Date().toISOString();
+    check(await (await supa()).from(TABLE).insert({ id, data: { ...d, addedAt: created_at }, created_at }));
+    return id;
   },
   async update(id, data) {
-    if (!S.firebase) { const l = await demoAll(); const i = l.findIndex((x) => x.id === id); if (i > -1) l[i] = { ...l[i], ...data }; demoSave(l); return; }
-    const { fs, db } = await firebase();
-    await fs.updateDoc(fs.doc(db, 'properties', id), { ...data, updatedAt: fs.serverTimestamp() });
+    if (!S.supabase) { const l = await demoAll(); const i = l.findIndex((x) => x.id === id); if (i > -1) l[i] = { ...l[i], ...data }; demoSave(l); return; }
+    const sb = await supa();
+    const cur = check(await sb.from(TABLE).select('data').eq('id', id).single());
+    const d = await withPhotos(id, data);
+    check(await sb.from(TABLE).update({ data: { ...cur.data, ...d, updatedAt: new Date().toISOString() } }).eq('id', id));
   },
   async remove(id) {
-    if (!S.firebase) { demoSave((await demoAll()).filter((x) => x.id !== id)); return; }
-    const { fs, db } = await firebase();
-    await fs.deleteDoc(fs.doc(db, 'properties', id));
+    if (!S.supabase) { demoSave((await demoAll()).filter((x) => x.id !== id)); return; }
+    const sb = await supa();
+    check(await sb.from(TABLE).delete().eq('id', id));
+    const files = (await sb.storage.from(BUCKET).list(id)).data || [];
+    if (files.length) await sb.storage.from(BUCKET).remove(files.map((f) => `${id}/${f.name}`));
   },
   resetDemo() { localStorage.removeItem(DEMO_KEY); },
 };

@@ -16,7 +16,8 @@ window.SITE = {
   featuredLabel: 'Ексклюзив',
   mortgageRate: 7,
 
-  firebase: {
+  // Стара база (тільки для кнопки «Перенести з Firebase» в адмінці). Після перенесення можна видалити.
+  oldFirebase: {
     apiKey: 'AIzaSyATPexSn7etxoBsTsBd3JXND5R9MsrtvJk',
     authDomain: 'grand-life-7c3a9.firebaseapp.com',
     projectId: 'grand-life-7c3a9',
@@ -25,7 +26,7 @@ window.SITE = {
     appId: '1:855282740287:web:10081c86ad3a0c9c235c8a',
   },
   supabase: { url: 'https://sinzjgxgvvencjvkokbc.supabase.co', key: 'sb_publishable_gAYiilkETOHpmKRgQh_13Q_hxlS87yO' },
-  adminEmails: ['igor.grandlife@gmail.com'],
+  adminEmails: ['igor.grandlife@gmail.com', 'anastasiakocubenko39@gmail.com'],
 
   heroImage: 'assets/img/hero.webp',
   heroKicker: 'Агентство нерухомості · Київ та область',
