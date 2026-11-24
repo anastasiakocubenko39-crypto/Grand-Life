@@ -26,7 +26,7 @@ window.SITE = {
     appId: '1:855282740287:web:10081c86ad3a0c9c235c8a',
   },
   supabase: { url: 'https://rheeoeeewtucppooyvcb.supabase.co', key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJoZWVvZWVld3R1Y3Bwb295dmNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzNzY4NjAsImV4cCI6MjEwNDk1Mjg2MH0.T71YSk30WySY1IgBWByN85mh9wZGe4VbOighXkSd3Eo' },
-  adminEmails: ['igor.grandlife@gmail.com', 'anastasiakocubenko39@gmail.com'],
+  adminEmails: ['igor.grandlife@gmail.com', 'anastasiakocubenko39@gmail.com', 'annasosyura5@gmail.com'],
 
   heroImage: 'assets/img/hero.webp',
   heroKicker: 'Агентство нерухомості · Київ та область',
