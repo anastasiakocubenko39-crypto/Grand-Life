@@ -74,14 +74,17 @@ export function norm(id, d) {
   p.title = d.title || 'Об’єкт без назви';
   p.location = d.location || '';
   p.purpose = fixPurpose(d.purpose);
+  // Угода: Продаж або Оренда (обирає менеджер; старі об’єкти типу «Оренда» — теж оренда)
+  p.deal = d.deal === 'Оренда' || d.type === 'Оренда' ? 'Оренда' : 'Продаж';
+  p.rent = p.deal === 'Оренда';
   return p;
 }
 
 /* Друга валюта: для цін у $ / € — гривні за курсом НБУ, для гривень — долари. */
 export const altPrice = (p) => p.priceValue == null ? '' : p.currency === '₴' ? `≈ $${fmt(p.usd)}` : `≈ ${fmt(p.uah)} ₴`;
 export const priceHTML = (p, cls = '') => p.priceValue == null ? `<span class="price ${cls}">Ціна за запитом</span>`
-  : `<span class="price ${cls}">${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' <small>/ місяць</small>' : ''}<span class="price-alt" title="За курсом НБУ${FX.date ? ' на ' + FX.date : ''}">${altPrice(p)}${p.type === 'Оренда' ? ' / міс' : ''}</span></span>`;
-export const priceText = (p) => p.priceValue == null ? 'За запитом' : `${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' / міс' : ''} (${altPrice(p)})`;
+  : `<span class="price ${cls}">${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.rent ? ' <small>/ місяць</small>' : ''}<span class="price-alt" title="За курсом НБУ${FX.date ? ' на ' + FX.date : ''}">${altPrice(p)}${p.rent ? ' / міс' : ''}</span></span>`;
+export const priceText = (p) => p.priceValue == null ? 'За запитом' : `${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.rent ? ' / міс' : ''} (${altPrice(p)})`;
 export const areaText = (p) => (p.areaValue != null ? `${String(p.areaValue).replace('.', ',')} ${p.areaUnit}` : '');
 
 /* ── icons ── */
@@ -236,7 +239,7 @@ export function cardHTML(p, i = 0) {
   return `<a class="pcard rv${p.sold ? ' is-sold' : ''}" style="--d:${(i % 3) * 0.07}s" href="object.html?id=${encodeURIComponent(p.id)}">
     <div class="pcard-img">
       ${img ? `<img src="${esc(img)}" alt="${esc(p.title)}" loading="lazy">` : `<div class="noimg"><img src="${S.mark}" alt=""></div>`}
-      <div class="badges"><span class="badge">${esc(TYPE[p.type].one)}</span>${p.featured ? `<span class="badge accent">${esc(S.featuredLabel || 'Ексклюзив')}</span>` : ''}${p.sold ? `<span class="badge sold">${p.type === 'Оренда' ? 'Здано' : 'Продано'}</span>` : ''}</div>
+      <div class="badges"><span class="badge">${esc(TYPE[p.type].one)}</span>${p.rent && p.type !== 'Оренда' ? '<span class="badge rent">Оренда</span>' : ''}${p.featured ? `<span class="badge accent">${esc(S.featuredLabel || 'Ексклюзив')}</span>` : ''}${p.sold ? `<span class="badge sold">${p.rent ? 'Здано' : 'Продано'}</span>` : ''}</div>
       ${p.images.length > 1 ? `<span class="pcount">${I.photo}${p.images.length}</span>` : ''}
     </div>
     <div class="pcard-body">
@@ -310,7 +313,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261135').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261136').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;

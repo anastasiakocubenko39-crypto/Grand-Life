@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, fixPurpose, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261135';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, fixPurpose, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261136';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -183,7 +183,7 @@ function showList() {
           <button class="ibtn" data-a="edit">${ICON.edit}Редагувати</button>
           <a class="ibtn" href="object.html?id=${encodeURIComponent(p.id)}" target="_blank" rel="noopener">${ICON.eye}Переглянути</a>
           <button class="ibtn${p.featured ? ' on' : ''}" data-a="star" title="Показувати на головній">${ICON.star}</button>
-          <button class="ibtn" data-a="sold">${p.sold ? 'Повернути в продаж' : (p.type === 'Оренда' ? 'Здано' : 'Продано')}</button>
+          <button class="ibtn" data-a="sold">${p.sold ? (p.rent ? 'Повернути в оренду' : 'Повернути в продаж') : (p.rent ? 'Здано' : 'Продано')}</button>
           <button class="ibtn danger" data-a="del" title="Видалити">${ICON.trash}</button>
         </div>
       </div>`).join('') : `<div class="empty"><b>${P.length ? 'Нічого не знайдено' : 'Поки що немає об’єктів'}</b>${P.length ? 'Змініть пошук або фільтри.' : 'Натисніть «Додати об’єкт», щоб створити перший.'}</div>`;
@@ -228,12 +228,13 @@ function openEditor(id) {
     priceValue: p?.priceValue ?? '', currency: p?.currency || '$', priceNote: d.priceNote || '',
     areaValue: p?.areaValue ?? '', areaUnit: p?.areaUnit || 'м²', livingArea: d.livingArea || '', kitchenArea: d.kitchenArea || '', landArea: d.landArea || '',
     livingUnit: d.livingUnit || 'м²', kitchenUnit: d.kitchenUnit || 'м²', landUnit: d.landUnit || 'сот',
-    rooms: d.rooms && d.rooms !== '—' ? d.rooms : '', bedrooms: d.bedrooms || '', bathrooms: d.bathrooms || '', floor: d.floor || '', floors: d.floors || '', year: d.year || '', ceiling: d.ceiling || '',
-    condition: d.condition || '', walls: d.walls || '', heating: d.heating || '', purpose: fixPurpose(d.purpose), cadastre: d.cadastre || '',
+    rooms: d.rooms && d.rooms !== '—' ? d.rooms : '', bathrooms: d.bathrooms || '', floor: d.floor || '', floors: d.floors || '', year: d.year || '',
+    condition: d.condition || '', purpose: fixPurpose(d.purpose), cadastre: d.cadastre || '',
     rentTerm: d.rentTerm || '', deposit: d.deposit || '', available: d.available || '',
     description: d.description || '', infrastructure: d.infrastructure || '', videoUrl: d.videoUrl || '', code: d.code || '',
     features: [...(p?.features || [])], featured: !!d.featured, sold: !!d.sold,
     finance: Array.isArray(d.finance) ? [...d.finance] : [],
+    deal: d.deal === 'Оренда' || d.type === 'Оренда' ? 'Оренда' : 'Продаж',
   };
   photos = [...(p?.images || [])];
   const opt = (arr, v) => `<option value="">— не вказано —</option>` + arr.map((x) => `<option${x === v ? ' selected' : ''}>${esc(x)}</option>`).join('');
@@ -244,7 +245,9 @@ function openEditor(id) {
     <div class="editor">
       <div>
         <section class="card"><h2><i>1</i>Тип об’єкта <em style="color:#B3261E;font-style:normal">*</em></h2><p class="hint">Від типу залежить розділ сайту і поля нижче.</p>
-          <div class="types" id="types">${TYPES.filter((t) => !t.hidden || t.id === form.type).map((t) => `<button type="button" data-t="${t.id}" aria-pressed="${form.type === t.id}">${t.one}</button>`).join('')}</div></section>
+          <div class="types" id="types">${TYPES.filter((t) => !t.hidden || t.id === form.type).map((t) => `<button type="button" data-t="${t.id}" aria-pressed="${form.type === t.id}">${t.one}</button>`).join('')}</div>
+          <p class="hint" style="margin:18px 0 10px">Угода</p>
+          <div class="types deal" id="deal">${['Продаж', 'Оренда'].map((v) => `<button type="button" data-deal="${v}" aria-pressed="${form.deal === v}">${v}</button>`).join('')}</div></section>
 
         <section class="card"><h2><i>2</i>Основне</h2><p class="hint">Назва з’являється в картці та на сторінці об’єкта.</p>
           <div class="fgrid">
@@ -268,12 +271,9 @@ function openEditor(id) {
 
         <section class="card only-build"><h2><i>4</i>Характеристики</h2><p class="hint">Заповнюйте все, що знаєте, — порожні поля на сайті не показуються.</p>
           <div class="fgrid three">
-            ${inp('rooms', 'Кімнат', '3')}${inp('bedrooms', 'Спалень', '2')}${inp('bathrooms', 'Санвузлів', '2')}
+            ${inp('rooms', 'Кімнат', '3')}${inp('bathrooms', 'Санвузлів', '2')}
             ${inp('floor', 'Поверх', '7')}${inp('floors', 'Поверхів у будинку', '12')}${inp('year', 'Рік будівництва', '2021')}
-            ${inp('ceiling', 'Висота стель, м', '2,9')}
             <label class="f"><span>Стан</span><select class="field" data-k="condition">${opt(CONDITIONS, form.condition)}</select></label>
-            <label class="f"><span>Матеріал стін</span><select class="field" data-k="walls">${opt(WALLS, form.walls)}</select></label>
-            <label class="f"><span>Опалення</span><select class="field" data-k="heating">${opt(HEATING, form.heating)}</select></label>
           </div></section>
 
         <section class="card only-land"><h2><i>4</i>Про ділянку</h2><p class="hint">Цільове призначення і кадастровий номер підвищують довіру покупця.</p>
@@ -322,6 +322,7 @@ function openEditor(id) {
     form[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; dirty = true; refresh();
   });
   $('#main').addEventListener('change', (e) => { const k = e.target.dataset.k; if (k) { form[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; dirty = true; refresh(); } });
+  $('#deal').onclick = (e) => { const b = e.target.closest('[data-deal]'); if (!b) return; form.deal = b.dataset.deal; $$('#deal button').forEach((x) => x.setAttribute('aria-pressed', x === b)); dirty = true; refresh(); };
   $('#types').onclick = (e) => { const b = e.target.closest('[data-t]'); if (!b) return; form.type = b.dataset.t; $$('#types button').forEach((x) => x.setAttribute('aria-pressed', x === b)); dirty = true; refresh(); };
   $$('#finChips .chip').forEach((c) => (c.onclick = () => { const n = c.dataset.fin; form.finance = form.finance.includes(n) ? form.finance.filter((x) => x !== n) : [...form.finance, n]; c.setAttribute('aria-pressed', form.finance.includes(n)); dirty = true; refresh(); }));
   $$('.feat-groups .chip').forEach((c) => (c.onclick = () => { const f = c.dataset.f; form.features = form.features.includes(f) ? form.features.filter((x) => x !== f) : [...form.features, f]; c.setAttribute('aria-pressed', form.features.includes(f)); dirty = true; refresh(); }));
@@ -354,9 +355,10 @@ function refresh() {
   $$('.only-build').forEach((e) => (e.hidden = t === 'Ділянка'));
   $$('.only-house').forEach((e) => (e.hidden = t !== 'Будинок'));
   $$('.only-land').forEach((e) => (e.hidden = t !== 'Ділянка'));
-  $$('.only-rent').forEach((e) => (e.hidden = t !== 'Оренда'));
+  const rent = form.deal === 'Оренда' || t === 'Оренда';
+  $$('.only-rent').forEach((e) => (e.hidden = !rent));
   let n = 1; $$('.editor > div > .card').forEach((c) => { const i = c.querySelector('h2 i'); if (i && !c.hidden) i.textContent = n++; });
-  $('#rentHint').textContent = t === 'Оренда' ? 'Для оренди — ціна за місяць.' : '';
+  $('#rentHint').textContent = rent ? 'Для оренди — ціна за місяць.' : '';
   $('#chars').textContent = `${form.description.length} символів${form.description.length < 400 ? ' · радимо від 600' : ''}`;
   const checks = [
     [!!t, 'Тип обрано'], [!!form.title.trim(), 'Є назва'], [!!form.location.trim(), 'Вказано локацію'], [form.priceValue !== '', 'Вказано ціну'],
@@ -379,9 +381,10 @@ function data() {
     features: f.features, featured: !!f.featured, sold: !!f.sold,
     finance: (S.financePrograms || []).map(([n]) => n).filter((n) => f.finance.includes(n)),
   };
-  if (f.type !== 'Ділянка') Object.assign(out, { livingArea: f.livingArea, livingUnit: f.livingUnit, kitchenArea: f.kitchenArea, kitchenUnit: f.kitchenUnit, landArea: f.landArea, landUnit: f.landUnit, rooms: f.rooms || '—', bedrooms: f.bedrooms, bathrooms: f.bathrooms, floor: f.floor, floors: f.floors, year: f.year, ceiling: f.ceiling, condition: f.condition, walls: f.walls, heating: f.heating });
+  if (f.type !== 'Ділянка') Object.assign(out, { livingArea: f.livingArea, livingUnit: f.livingUnit, kitchenArea: f.kitchenArea, kitchenUnit: f.kitchenUnit, landArea: f.landArea, landUnit: f.landUnit, rooms: f.rooms || '—', bathrooms: f.bathrooms, floor: f.floor, floors: f.floors, year: f.year, condition: f.condition });
   else Object.assign(out, { rooms: '—', purpose: f.purpose, cadastre: f.cadastre });
-  if (f.type === 'Оренда') Object.assign(out, { rentTerm: f.rentTerm, deposit: f.deposit, available: f.available });
+  out.deal = f.type === 'Оренда' ? 'Оренда' : f.deal;
+  if (out.deal === 'Оренда') Object.assign(out, { rentTerm: f.rentTerm, deposit: f.deposit, available: f.available });
   return out;
 }
 const bytes = () => photos.reduce((s, p) => s + p.length, 0) + JSON.stringify(data()).length;
