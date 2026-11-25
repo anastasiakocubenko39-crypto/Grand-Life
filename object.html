@@ -8,9 +8,9 @@
 <link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261135">
-<link rel="stylesheet" href="assets/app.css?v=20261135">
-<script src="config.js?v=20261135"></script>
+<link rel="stylesheet" href="theme.css?v=20261137">
+<link rel="stylesheet" href="assets/app.css?v=20261137">
+<script src="config.js?v=20261137"></script>
 </head>
 <body class="has-bar">
 <main class="obj"><div class="wrap" id="root"><div class="skeleton" style="min-height:520px;margin-top:30px"></div></div></main>
@@ -20,7 +20,7 @@
   <div class="lb-thumbs" id="lbThumbs"></div>
 </div>
 <script type="module">
-import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261135';
+import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261137';
 layout({ page: 'catalog' });
 $('#lbClose').innerHTML = I.x; $('#lbPrev').innerHTML = I.left; $('#lbNext').innerHTML = I.right;
 const id = new URLSearchParams(location.search).get('id');
@@ -39,13 +39,13 @@ function render() {
   const isLand = p.type === 'Ділянка';
   // Програми фінансування, які менеджер відмітив для цього об’єкта (порядок — як у config.js)
   const progs = (S.financePrograms || []).filter(([n]) => Array.isArray(p?.finance) && p.finance.includes(n));
-  const perM2 = p.priceValue && p.areaValue && p.type !== 'Оренда' ? (p.areaUnit === 'м²' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за м²` : p.areaUnit === 'сот' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за сотку` : '') : '';
+  const perM2 = p.priceValue && p.areaValue && !p.rent ? (p.areaUnit === 'м²' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за м²` : p.areaUnit === 'сот' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за сотку` : '') : '';
   const gal = imgs.length
     ? `<div class="gallery${imgs.length === 1 ? ' one' : imgs.length === 2 ? ' two' : ''}">${imgs.slice(0, 3).map((src, i) => `<button data-i="${i}" aria-label="Відкрити фото ${i + 1}"><img src="${esc(src)}" alt="${esc(p.title)} — фото ${i + 1}"${i ? ' loading="lazy"' : ''}>${i === 2 && imgs.length > 3 ? `<span class="more">+${imgs.length - 3} фото</span>` : ''}${i === 0 && imgs.length > 1 ? `<span class="pcount count-m">${I.photo}${imgs.length}</span>` : ''}</button>`).join('')}</div>`
     : `<div class="gallery one"><div class="noimg" style="background:var(--surface-2)"><img src="${S.mark}" alt=""></div></div>`;
 
   const key = [
-    [esc(priceText(p)), p.type === 'Оренда' ? 'оренда на місяць' : 'ціна'],
+    [esc(priceText(p)), p.rent ? 'оренда на місяць' : 'ціна'],
     [areaText(p), isLand ? 'площа ділянки' : 'загальна площа'],
     !isLand && p.roomsNum && [p.roomsNum, 'кімнат'],
     !isLand && p.floor && [`${esc(p.floor)}${p.floors ? ' / ' + esc(p.floors) : ''}`, 'поверх'],
@@ -55,13 +55,13 @@ function render() {
   ].filter((x) => x && x[0]).slice(0, 4);
 
   const rows = [
-    ['Тип', t.one], ['Угода', p.type === 'Оренда' ? 'Довгострокова оренда' : 'Продаж'],
+    ['Тип', t.one], ['Угода', p.rent ? 'Довгострокова оренда' : 'Продаж'],
     ['Локація', p.location], ['Адреса', p.address], ['Житловий комплекс / масив', p.complex],
     ['Загальна площа', areaText(p)], ['Житлова площа', p.livingArea && p.livingArea + ' ' + (p.livingUnit || 'м²')], ['Площа кухні', p.kitchenArea && p.kitchenArea + ' ' + (p.kitchenUnit || 'м²')],
     ['Площа земельної ділянки', !isLand && p.landArea && p.landArea + ' ' + (p.landUnit || 'сот')],
-    ['Кімнат', !isLand && p.rooms], ['Спалень', p.bedrooms], ['Санвузлів', p.bathrooms],
+    ['Кімнат', !isLand && p.rooms], ['Санвузлів', p.bathrooms],
     ['Поверх', p.floor], ['Поверховість', p.floors], ['Рік будівництва / здачі', p.year],
-    ['Стан', p.condition], ['Матеріал стін', p.walls], ['Опалення', p.heating], ['Висота стель', p.ceiling && p.ceiling + ' м'],
+    ['Стан', p.condition],
     ['Цільове призначення', p.purpose], ['Кадастровий номер', p.cadastre],
     ['Ціна', priceText(p)], ['Ціна за одиницю', perM2], ['Умови оплати', p.priceNote], ['Програми фінансування', progs.map(([n]) => n).join(', ')],
     ['Мінімальний строк оренди', p.rentTerm], ['Застава / комісія', p.deposit],
@@ -79,7 +79,7 @@ function render() {
     ${gal}
     <div class="obj-grid">
       <article>
-        <div class="obj-title rv"><span class="badge">${esc(t.one)}</span>${p.featured ? `<span class="badge">${esc(S.featuredLabel || 'Ексклюзив')}</span>` : ''}${p.sold ? `<span class="badge sold">${p.type === 'Оренда' ? 'Здано' : 'Продано'}</span>` : ''}</div>
+        <div class="obj-title rv"><span class="badge">${esc(t.one)}</span>${p.featured ? `<span class="badge">${esc(S.featuredLabel || 'Ексклюзив')}</span>` : ''}${p.sold ? `<span class="badge sold">${p.rent ? 'Здано' : 'Продано'}</span>` : ''}</div>
         <h1 class="h1 rv">${esc(p.title)}</h1>
         ${p.location ? `<div class="loc rv">${I.pin}<span>${esc([p.address, p.location].filter(Boolean).join(', '))}</span></div>` : ''}
         ${key.length ? `<div class="keyfacts rv">${key.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('')}</div>` : ''}
