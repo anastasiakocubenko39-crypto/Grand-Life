@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261125';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
