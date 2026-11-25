@@ -8,9 +8,9 @@
 <link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261137">
-<link rel="stylesheet" href="assets/app.css?v=20261137">
-<script src="config.js?v=20261137"></script>
+<link rel="stylesheet" href="theme.css?v=20261138">
+<link rel="stylesheet" href="assets/app.css?v=20261138">
+<script src="config.js?v=20261138"></script>
 </head>
 <body class="has-bar">
 <main class="obj"><div class="wrap" id="root"><div class="skeleton" style="min-height:520px;margin-top:30px"></div></div></main>
@@ -20,7 +20,7 @@
   <div class="lb-thumbs" id="lbThumbs"></div>
 </div>
 <script type="module">
-import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261137';
+import { S, TYPE, SUBTYPES, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261138';
 layout({ page: 'catalog' });
 $('#lbClose').innerHTML = I.x; $('#lbPrev').innerHTML = I.left; $('#lbNext').innerHTML = I.right;
 const id = new URLSearchParams(location.search).get('id');
@@ -55,7 +55,7 @@ function render() {
   ].filter((x) => x && x[0]).slice(0, 4);
 
   const rows = [
-    ['Тип', t.one], ['Угода', p.rent ? 'Довгострокова оренда' : 'Продаж'],
+    ['Тип', t.one], [SUBTYPES[p.type]?.label, SUBTYPES[p.type] && p.subtype], ['Угода', p.rent ? 'Довгострокова оренда' : 'Продаж'],
     ['Локація', p.location], ['Адреса', p.address], ['Житловий комплекс / масив', p.complex],
     ['Загальна площа', areaText(p)], ['Житлова площа', p.livingArea && p.livingArea + ' ' + (p.livingUnit || 'м²')], ['Площа кухні', p.kitchenArea && p.kitchenArea + ' ' + (p.kitchenUnit || 'м²')],
     ['Площа земельної ділянки', !isLand && p.landArea && p.landArea + ' ' + (p.landUnit || 'сот')],

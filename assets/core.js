@@ -14,6 +14,11 @@ export const TYPE = Object.fromEntries(TYPES.map((t) => [t.id, t]));
 /* Типи, які показуються відвідувачам (Оренду прибрано з сайту, старі об’єкти оренди лишаються доступні за посиланням). */
 export const PUBLIC_TYPES = TYPES.filter((t) => !t.hidden);
 
+/* Тип будинку / тип квартири (поле «subtype», показується в характеристиках) */
+export const SUBTYPES = {
+  'Будинок': { label: 'Тип будинку', list: ['Таунхаус', 'Будинок', 'Клубний будинок', 'Дуплекс', 'Котедж', 'Дача', 'Модульний будинок', 'Частина будинку'] },
+  'Квартира': { label: 'Тип квартири', list: ['Чешка', 'Хрущовка', 'Житловий фонд 90-х–2000-х', 'Гуртожиток', 'Житловий фонд 2000-х–2020-х'] },
+};
 export const CONDITIONS = ['Новобудова від забудовника', 'Дизайнерський ремонт', 'Євроремонт', 'Сучасний ремонт', 'Житловий стан', 'Під ремонт', 'Після будівельників'];
 export const WALLS = ['Цегла', 'Моноліт', 'Газоблок', 'Керамоблок', 'Панель', 'Дерево / каркас', 'Інше'];
 export const HEATING = ['Індивідуальне газове', 'Централізоване', 'Електричне', 'Тепловий насос', 'Твердопаливне', 'Комбіноване', 'Немає'];
@@ -313,7 +318,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261137').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261138').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
