@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261127';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261128';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -87,9 +87,9 @@ async function showLeads() {
   const draw = () => {
     $('#leadRows').innerHTML = LEADS.length ? LEADS.map((l) => `
       <div class="row lead${l.done ? ' done' : ''}" data-id="${esc(l.id)}">
-        <div class="th lead-ic">${l.kind === 'Оренда' ? 'О' : 'П'}</div>
+        <div class="th lead-ic">${l.kind === 'Шукає оренду' ? 'Ш' : l.kind === 'Оренда' ? 'О' : 'П'}</div>
         <div><h3>${esc(l.name || 'Без імені')} · <a href="tel:${esc(String(l.phone).replace(/[^\d+]/g, ''))}">${esc(l.phone)}</a></h3>
-          <div class="meta"><span class="pill">${l.kind === 'Оренда' ? 'Здати в оренду' : 'Продати'}</span>${l.done ? '<span class="pill">Опрацьовано</span>' : '<span class="pill star">Нова</span>'}<span>${new Date(l.created_at).toLocaleString('uk-UA', { dateStyle: 'medium', timeStyle: 'short' })}</span>${l.page ? `<span>зі сторінки ${esc(l.page)}</span>` : ''}</div></div>
+          <div class="meta"><span class="pill">${l.kind === 'Шукає оренду' ? 'Орендар: шукає оренду' : l.kind === 'Оренда' ? 'Власник: здати в оренду' : 'Власник: продати'}</span>${l.object ? `<span class="pill">${esc(l.object)}</span>` : ''}${l.done ? '<span class="pill">Опрацьовано</span>' : '<span class="pill star">Нова</span>'}<span>${new Date(l.created_at).toLocaleString('uk-UA', { dateStyle: 'medium', timeStyle: 'short' })}</span>${l.page ? `<span>зі сторінки ${esc(l.page)}</span>` : ''}</div></div>
         <div class="acts">
           <a class="ibtn" href="tel:${esc(String(l.phone).replace(/[^\d+]/g, ''))}">Зателефонувати</a>
           <button class="ibtn${l.done ? '' : ' on'}" data-a="done">${l.done ? 'Повернути в нові' : 'Опрацьовано'}</button>

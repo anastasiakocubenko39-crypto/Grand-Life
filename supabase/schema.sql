@@ -78,3 +78,10 @@ create policy "grandlife leads admin update" on public.grandlife_leads for updat
 create policy "grandlife leads admin delete" on public.grandlife_leads for delete to authenticated using (public.grandlife_is_admin());
 grant insert on public.grandlife_leads to anon, authenticated;
 grant select, update, delete on public.grandlife_leads to authenticated;
+
+-- Оновлення: вікно реклами питає «власник чи орендар» і тип об’єкта.
+alter table public.grandlife_leads add column if not exists object text not null default '';
+drop policy if exists "grandlife leads insert" on public.grandlife_leads;
+create policy "grandlife leads insert" on public.grandlife_leads for insert to anon, authenticated
+  with check (kind in ('Продаж', 'Оренда', 'Шукає оренду') and object in ('', 'Квартира', 'Будинок', 'Ділянка', 'Комерція')
+    and char_length(phone) between 5 and 30 and char_length(name) <= 80 and char_length(page) <= 60 and done = false);

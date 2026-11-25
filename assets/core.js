@@ -197,7 +197,8 @@ export const store = {
   resetDemo() { localStorage.removeItem(DEMO_KEY); },
   /* Заявки з реклами (вікно і банер). Відвідувач може лише додати заявку; читати й змінювати — тільки адмін. */
   async lead(d) {
-    const row = { kind: d.kind === 'Оренда' ? 'Оренда' : 'Продаж', name: String(d.name || '').slice(0, 80), phone: String(d.phone || '').slice(0, 30), page: String(d.page || '').slice(0, 60) };
+    const KINDS = ['Продаж', 'Оренда', 'Шукає оренду'], OBJS = ['Квартира', 'Будинок', 'Ділянка', 'Комерція'];
+    const row = { kind: KINDS.includes(d.kind) ? d.kind : 'Продаж', object: OBJS.includes(d.object) ? d.object : '', name: String(d.name || '').slice(0, 80), phone: String(d.phone || '').slice(0, 30), page: String(d.page || '').slice(0, 60) };
     if (!S.supabase) { const l = JSON.parse(localStorage.getItem(DEMO_KEY + '_leads') || '[]'); l.unshift({ ...row, id: Date.now(), created_at: new Date().toISOString(), done: false }); localStorage.setItem(DEMO_KEY + '_leads', JSON.stringify(l)); return; }
     check(await (await supa()).from(LEADS).insert(row));
   },
@@ -301,7 +302,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261127').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261128').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
