@@ -540,3 +540,24 @@ body.landing { min-height: 100dvh; display: flex; flex-direction: column; backgr
   .ld-card .promo-side { border-radius: 22px 22px 0 0; }
   .ld-points { grid-template-columns: 1fr; width: calc(100% - 20px); gap: 8px; }
 }
+
+/* ── Юридичні послуги (legal.html) ── */
+.legal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.legal-card { display: flex; flex-direction: column; padding: 30px 28px 26px; border-radius: var(--card-radius); background: var(--surface); border: 1px solid var(--line); transition: border-color .3s, box-shadow .4s var(--ease), transform .4s var(--ease); }
+.legal-card:hover { border-color: var(--accent); box-shadow: 0 24px 50px -30px rgba(14, 30, 63, .35); transform: translateY(-3px); }
+.legal-card .ic { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); margin-bottom: 20px; }
+.legal-card .ic svg { width: 26px; height: 26px; }
+.legal-card h3 { font-family: var(--display); font-weight: 500; font-size: 22px; line-height: 1.2; color: var(--heading); margin: 0 0 10px; }
+.legal-card p { color: var(--muted); font-size: 14.5px; line-height: 1.6; margin: 0 0 22px; flex: 1; }
+.legal-card .btn { align-self: flex-start; }
+.legal-order { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: start; background: var(--surface); border-radius: calc(var(--card-radius) + 6px); padding: 50px; box-shadow: 0 30px 70px -45px rgba(14, 30, 63, .45); }
+.legal-form { display: grid; gap: 14px; }
+.legal-form .f span { display: block; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+@media (max-width: 1100px) { .legal-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 760px) {
+  .legal-grid { grid-template-columns: 1fr; }
+  .legal-card { padding: 24px 20px 22px; }
+  .legal-order { grid-template-columns: 1fr; gap: 26px; padding: 26px 18px; }
+}
+.legal-order .contact-list a { color: var(--heading); border-color: var(--line); }
+.legal-order .contact-list a:hover { color: var(--accent-ink); }

@@ -197,8 +197,10 @@ export const store = {
   resetDemo() { localStorage.removeItem(DEMO_KEY); },
   /* Заявки з реклами (вікно і банер). Відвідувач може лише додати заявку; читати й змінювати — тільки адмін. */
   async lead(d) {
-    const KINDS = ['Продаж', 'Оренда', 'Купівля', 'Шукає оренду'], OBJS = ['Квартира', 'Будинок', 'Ділянка', 'Комерція'];
-    const row = { kind: KINDS.includes(d.kind) ? d.kind : 'Продаж', object: OBJS.includes(d.object) ? d.object : '', name: String(d.name || '').slice(0, 80), phone: String(d.phone || '').slice(0, 30), page: String(d.page || '').slice(0, 60) };
+    const KINDS = ['Продаж', 'Оренда', 'Купівля', 'Шукає оренду', 'Юридична послуга'], OBJS = ['Квартира', 'Будинок', 'Ділянка', 'Комерція'];
+    const kind = KINDS.includes(d.kind) ? d.kind : 'Продаж';
+    const object = kind === 'Юридична послуга' ? String(d.object || '').slice(0, 80) : OBJS.includes(d.object) ? d.object : '';
+    const row = { kind, object, name: String(d.name || '').slice(0, 80), phone: String(d.phone || '').slice(0, 30), page: String(d.page || '').slice(0, 60) };
     if (!S.supabase) { const l = JSON.parse(localStorage.getItem(DEMO_KEY + '_leads') || '[]'); l.unshift({ ...row, id: Date.now(), created_at: new Date().toISOString(), done: false }); localStorage.setItem(DEMO_KEY + '_leads', JSON.stringify(l)); return; }
     check(await (await supa()).from(LEADS).insert(row));
   },
@@ -247,7 +249,7 @@ export const telHref = (p) => 'tel:' + String(p).replace(/[^\d+]/g, '');
 
 export function layout({ page = '', overDark = false } = {}) {
   document.documentElement.classList.add('js');
-  const links = [['index.html', 'Головна', 'home'], ['catalog.html', 'Об’єкти', 'catalog'], ['about.html', 'Про нас', 'about'], ['index.html?to=contacts', 'Контакти', 'contacts']];
+  const links = [['index.html', 'Головна', 'home'], ['catalog.html', 'Об’єкти', 'catalog'], ['legal.html', 'Юридичні послуги', 'legal'], ['about.html', 'Про нас', 'about'], ['index.html?to=contacts', 'Контакти', 'contacts']];
   const nav = links.map(([h, t, k]) => `<a href="${h}"${k === page ? ' aria-current="page"' : ''}>${t}</a>`).join('');
   const phone = S.phones?.[0];
   const logo = `<a class="logo" href="index.html" aria-label="${esc(S.name)} — на головну"><img class="on-light" src="${S.logo}" alt="${esc(S.name)}"><img class="on-dark" src="${S.logoLight}" alt=""></a>`;
@@ -262,7 +264,7 @@ export function layout({ page = '', overDark = false } = {}) {
   <footer class="ftr"><div class="wrap"><div class="ftr-grid">
     <div><a class="logo" href="index.html"><img src="${S.logoLight}" alt="${esc(S.name)}" style="height:calc(var(--logo-h,44px) * 1.1)"></a><p>${esc(S.footerText)}</p></div>
     <div><h5>Об’єкти</h5><ul>${PUBLIC_TYPES.map((t) => `<li><a href="catalog.html?type=${encodeURIComponent(t.id)}">${t.label}</a></li>`).join('')}</ul></div>
-    <div><h5>Компанія</h5><ul><li><a href="about.html">Про нас</a></li><li><a href="about.html?to=process">Як ми працюємо</a></li><li><a href="about.html?to=faq">Питання і відповіді</a></li><li><a href="index.html?to=contacts">Контакти</a></li></ul></div>
+    <div><h5>Компанія</h5><ul><li><a href="about.html">Про нас</a></li><li><a href="legal.html">Юридичні послуги</a></li><li><a href="about.html?to=process">Як ми працюємо</a></li><li><a href="about.html?to=faq">Питання і відповіді</a></li><li><a href="index.html?to=contacts">Контакти</a></li></ul></div>
     <div><h5>Контакти</h5><ul>${(S.phones || []).map((p) => `<li><a href="${telHref(p)}">${esc(p)}</a></li>`).join('')}${S.email ? `<li><a href="mailto:${esc(S.email)}">${esc(S.email)}</a></li>` : ''}${S.instagram ? `<li><a href="https://instagram.com/${esc(S.instagram)}" target="_blank" rel="noopener">@${esc(S.instagram)}</a></li>` : ''}<li>${esc(S.region || '')}</li></ul></div>
   </div><div class="ftr-bottom"><span>© ${new Date().getFullYear()} ${esc(S.name)}. Усі права захищені.</span><a href="admin.html">Вхід для менеджера</a></div></div></footer>`);
 
@@ -302,7 +304,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261130').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261131').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;

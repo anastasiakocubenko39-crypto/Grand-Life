@@ -1,7 +1,7 @@
 /* Реклама: вікно при відкритті сайту (крок 1 — «Ви власник чи шукаєте оренду?», крок 2 — форма для власника
    або для орендаря) і банер унизу, що їде за сторінкою.
    Заявки зберігаються в Supabase (таблиця grandlife_leads) і видно в адмінці → «Заявки». */
-import { S, I, esc, store, telHref, $ } from './core.js?v=20261130';
+import { S, I, esc, store, telHref, $ } from './core.js?v=20261131';
 
 const SENT = 'gl_lead_sent2';   // коли відвідувач залишив заявку (вікно 3 дні не показуємо)
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } } };
