@@ -561,3 +561,22 @@ body.landing { min-height: 100dvh; display: flex; flex-direction: column; backgr
 }
 .legal-order .contact-list a { color: var(--heading); border-color: var(--line); }
 .legal-order .contact-list a:hover { color: var(--accent-ink); }
+
+/* Калькулятор іпотеки: програми фінансування */
+.calc-progs { display: flex; flex-wrap: wrap; gap: 6px; }
+.calc-progs button { padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line-strong); background: var(--bg); color: var(--heading); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.calc-progs button[aria-pressed="true"] { background: var(--heading); border-color: var(--heading); color: #fff; }
+.calc-note { font-size: 12.5px; color: var(--muted); margin-top: -4px; }
+.calc output small { font-family: var(--sans); font-size: 14px; color: var(--muted); }
+
+.calc select.field { margin-top: 2px; padding: 10px 12px; font-size: 14px; color: var(--heading); }
+.calc-check { display: flex !important; grid-template-columns: none; align-items: center; gap: 8px !important; font-size: 13.5px !important; color: var(--heading) !important; cursor: pointer; }
+.calc-check input { width: 18px; height: 18px; accent-color: var(--accent-ink); }
+.calc-rate { font-size: 13.5px; color: var(--muted); }
+.calc-rate b { color: var(--heading); }
+.calc-after { font-size: 13px; color: var(--muted); margin-top: 2px; }
+.calc-sum { display: grid; gap: 6px; margin: 0; padding-top: 10px; border-top: 1px solid var(--line); }
+.calc-sum div { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.calc-sum dt { color: var(--muted); }
+.calc-sum dd { margin: 0; font-weight: 600; color: var(--heading); }
+.calc-note { font-size: 12px !important; line-height: 1.5; }
