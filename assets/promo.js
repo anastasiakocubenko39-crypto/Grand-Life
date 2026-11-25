@@ -42,31 +42,8 @@ const FLOW = {
   },
 };
 
-export function promo() {
-  if (document.querySelector('.promo')) return;
-  document.body.insertAdjacentHTML('beforeend', `
-  <div class="promo" id="promo" hidden role="dialog" aria-modal="true" aria-labelledby="promoTitle">
-    <div class="promo-card">
-      <button class="promo-x" type="button" aria-label="Закрити">${ICO.close}</button>
-      <div class="promo-side">
-        <img id="promoImg" src="${esc(S.heroImage)}" alt="" loading="lazy">
-        <div class="promo-badge" id="promoBadge"><b>Гранд Лайф</b><span>агентство нерухомості з 2017 року</span></div>
-      </div>
-      <div class="promo-body" id="promoBody"></div>
-    </div>
-  </div>
-  <div class="promo-bar" id="promoBar" hidden>
-    <div class="wrap">
-      <span class="promo-bar-ic">${ICO.sell}</span>
-      <p><b>Продаєте, здаєте чи шукаєте оренду?</b><span> Безкоштовна консультація — підберемо рішення під вас.</span></p>
-      ${phone ? `<a class="btn line sm promo-bar-call" href="${telHref(phone)}" aria-label="Зателефонувати">${I.phone}<span>${esc(phone)}</span></a>` : ''}
-      <button class="btn sm" type="button" id="promoOpen"><span class="pb-d">Залишити заявку</span><span class="pb-m">Заявка</span></button>
-      <button class="promo-bar-x" type="button" aria-label="Сховати банер">${ICO.close}</button>
-    </div>
-  </div>`);
-
-  const modal = $('#promo'), bar = $('#promoBar'), body = $('#promoBody');
-  const side = (img, [b, s]) => { $('#promoImg').src = img; $('#promoBadge').innerHTML = `<b>${esc(b)}</b><span>${esc(s)}</span>`; };
+/* Кроки форми («власник чи орендар» → форма). Використовується у вікні на сайті і на міні-лендингу lead.html. */
+export function mountFlow(body, { side = () => {}, close = () => {}, source = '', start = '', doneHref = '' } = {}) {
 
   /* Крок 1: хто ви? */
   const stepWho = () => {
@@ -128,10 +105,10 @@ export function promo() {
       if (tel.replace(/\D/g, '').length < 9) { err.textContent = 'Вкажіть номер телефону, щоб ми могли передзвонити.'; form.phone.focus(); return; }
       err.textContent = ''; btn.disabled = true; btn.textContent = 'Надсилаємо…';
       try {
-        await store.lead({ kind, object, name, phone: tel, page: location.pathname.split('/').pop() || 'index.html' });
+        await store.lead({ kind, object, name, phone: tel, page: (source || location.pathname.split('/').pop() || 'index.html').slice(0, 60) });
         try { localStorage.setItem(SENT, String(Date.now())); } catch {}
-        body.innerHTML = `<div class="promo-done"><span class="promo-done-ic">${ICO.check}</span><h2 class="h2">Дякуємо${name ? ', ' + esc(name) : ''}!</h2><p class="promo-lead">${F.done}</p><button class="btn line block" type="button" id="promoDone">Повернутися на сайт</button></div>`;
-        $('#promoDone').onclick = close;
+        body.innerHTML = `<div class="promo-done"><span class="promo-done-ic">${ICO.check}</span><h2 class="h2">Дякуємо${name ? ', ' + esc(name) : ''}!</h2><p class="promo-lead">${F.done}</p>${doneHref ? `<a class="btn line block" href="${esc(doneHref)}">Перейти на сайт</a>` : '<button class="btn line block" type="button" id="promoDone">Повернутися на сайт</button>'}</div>`;
+        body.querySelector('#promoDone')?.addEventListener('click', close);
       } catch (x) {
         console.error(x);
         err.innerHTML = `Не вдалося надіслати. ${phone ? `Зателефонуйте нам: <a href="${telHref(phone)}">${esc(phone)}</a>` : 'Спробуйте ще раз.'}`;
@@ -141,7 +118,36 @@ export function promo() {
     if (!matchMedia('(max-width: 760px)').matches) setTimeout(() => form.phone.focus({ preventScroll: true }), 50);
   };
 
-  const open = () => { stepWho(); modal.hidden = false; requestAnimationFrame(() => modal.classList.add('on')); document.body.classList.add('promo-open'); };
+  const begin = FLOW[start] ? () => stepForm(start) : stepWho;
+  begin();
+}
+
+export function promo() {
+  if (document.querySelector('.promo')) return;
+  document.body.insertAdjacentHTML('beforeend', `
+  <div class="promo" id="promo" hidden role="dialog" aria-modal="true" aria-labelledby="promoTitle">
+    <div class="promo-card">
+      <button class="promo-x" type="button" aria-label="Закрити">${ICO.close}</button>
+      <div class="promo-side">
+        <img id="promoImg" src="${esc(S.heroImage)}" alt="" loading="lazy">
+        <div class="promo-badge" id="promoBadge"><b>Гранд Лайф</b><span>агентство нерухомості з 2017 року</span></div>
+      </div>
+      <div class="promo-body" id="promoBody"></div>
+    </div>
+  </div>
+  <div class="promo-bar" id="promoBar" hidden>
+    <div class="wrap">
+      <span class="promo-bar-ic">${ICO.sell}</span>
+      <p><b>Продаєте, здаєте чи шукаєте оренду?</b><span> Безкоштовна консультація — підберемо рішення під вас.</span></p>
+      ${phone ? `<a class="btn line sm promo-bar-call" href="${telHref(phone)}" aria-label="Зателефонувати">${I.phone}<span>${esc(phone)}</span></a>` : ''}
+      <button class="btn sm" type="button" id="promoOpen"><span class="pb-d">Залишити заявку</span><span class="pb-m">Заявка</span></button>
+      <button class="promo-bar-x" type="button" aria-label="Сховати банер">${ICO.close}</button>
+    </div>
+  </div>`);
+
+  const modal = $('#promo'), bar = $('#promoBar'), body = $('#promoBody');
+  const side = (img, [b, s]) => { $('#promoImg').src = img; $('#promoBadge').innerHTML = `<b>${esc(b)}</b><span>${esc(s)}</span>`; };
+  const open = () => { mountFlow(body, { side, close }); modal.hidden = false; requestAnimationFrame(() => modal.classList.add('on')); document.body.classList.add('promo-open'); };
   const close = () => { modal.classList.remove('on'); document.body.classList.remove('promo-open'); setTimeout(() => (modal.hidden = true), 300); };
   modal.querySelector('.promo-x').onclick = close;
   modal.addEventListener('click', (e) => { if (e.target === modal) close(); });

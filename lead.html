@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гранд Лайф — продати, здати чи орендувати нерухомість</title>
+<meta name="description" content="Безкоштовна консультація агентства нерухомості «Гранд Лайф»: продаж, здача в оренду та підбір оренди у Києві й Київській області.">
+<!-- Превʼю посилання в соцмережах і месенджерах -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Гранд Лайф">
+<meta property="og:title" content="Продаєте, здаєте чи шукаєте оренду?">
+<meta property="og:description" content="Безкоштовна консультація агентства «Гранд Лайф». Київ та Київська область. Залиште номер — передзвонимо.">
+<meta property="og:image" content="https://anastasiakocubenko39-crypto.github.io/Grand-Life/promo/og-1200x630.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://anastasiakocubenko39-crypto.github.io/Grand-Life/lead.html">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css?v=20261128">
+<link rel="stylesheet" href="assets/app.css?v=20261128">
+<script src="config.js?v=20261128"></script>
+</head>
+<body class="landing">
+  <div class="ld-bg"><img id="ldBg" alt=""></div>
+  <header class="ld-top">
+    <a href="index.html" class="ld-logo"><img id="ldLogo" alt="Гранд Лайф"></a>
+    <a class="btn line sm ld-call" id="ldCall" href="#"></a>
+  </header>
+
+  <main class="ld-main">
+    <div class="promo-card ld-card">
+      <div class="promo-side">
+        <img id="promoImg" alt="">
+        <div class="promo-badge" id="promoBadge"></div>
+      </div>
+      <div class="promo-body" id="ldBody"></div>
+    </div>
+
+    <ul class="ld-points">
+      <li><b>З 2017 року</b><span>працюємо у Києві та Київській області</span></li>
+      <li><b>Юридичний супровід</b><span>перевірка документів і безпечна угода</span></li>
+      <li><b>Без прихованих комісій</b><span>умови відомі заздалегідь</span></li>
+    </ul>
+  </main>
+
+  <footer class="ld-foot"><span id="ldFoot"></span> · <a href="index.html">Перейти на сайт</a></footer>
+
+<script type="module">
+import { S, esc, telHref, $ } from './assets/core.js?v=20261128';
+import { mountFlow } from './assets/promo.js?v=20261128';
+
+$('#ldBg').src = S.heroImage;
+$('#ldLogo').src = S.logoLight;
+const phone = (S.phones || [])[0];
+if (phone) { $('#ldCall').href = telHref(phone); $('#ldCall').textContent = phone; } else $('#ldCall').remove();
+$('#ldFoot').textContent = `© ${new Date().getFullYear()} ${S.name} · ${S.region || ''}`;
+
+// ?who=owner | ?who=tenant — одразу відкрити потрібну форму (для окремих рекламних кампаній).
+// utm_source / utm_campaign — записуються в заявку, щоб бачити, з якої реклами прийшла людина.
+const q = new URLSearchParams(location.search);
+const src = [q.get('utm_source'), q.get('utm_campaign')].filter(Boolean).join(' / ');
+const side = (img, [b, s]) => { $('#promoImg').src = img; $('#promoBadge').innerHTML = `<b>${esc(b)}</b><span>${esc(s)}</span>`; };
+mountFlow($('#ldBody'), { side, source: 'лендинг' + (src ? ' · ' + src : ''), start: q.get('who') || '', doneHref: 'index.html' });
+</script>
+</body>
+</html>
