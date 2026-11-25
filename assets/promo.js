@@ -1,12 +1,9 @@
 /* Реклама для власників: вікно при відкритті сайту і банер унизу, що їде за сторінкою.
    Заявки зберігаються в Supabase (таблиця grandlife_leads) і видно в адмінці → «Заявки». */
-import { S, I, esc, store, telHref, $ } from './core.js?v=20261126';
+import { S, I, esc, store, telHref, $ } from './core.js?v=20261127';
 
-const SEEN = 'gl_promo_seen';   // вікно вже показували в цій сесії
-const BAR_OFF = 'gl_bar_off';   // банер закрили в цій сесії
-const SENT = 'gl_lead_sent';    // заявку вже залишили — більше не нав’язуємо
-const ss = { get: (k) => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k) => { try { sessionStorage.setItem(k, '1'); } catch {} } };
-const ls = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k) => { try { localStorage.setItem(k, '1'); } catch {} } };
+const SENT = 'gl_lead_sent2';   // коли відвідувач залишив заявку (вікно 3 дні не показуємо)
+const ls = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } } };
 
 const ICO = {
   close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
@@ -59,7 +56,7 @@ export function promo() {
 
   const modal = $('#promo'), bar = $('#promoBar');
   let kind = 'Продаж';
-  const open = () => { modal.hidden = false; requestAnimationFrame(() => modal.classList.add('on')); document.body.classList.add('promo-open'); ss.set(SEEN); setTimeout(() => modal.querySelector('[name=phone]')?.focus({ preventScroll: true }), 350); };
+  const open = () => { modal.hidden = false; requestAnimationFrame(() => modal.classList.add('on')); document.body.classList.add('promo-open'); setTimeout(() => modal.querySelector('[name=phone]')?.focus({ preventScroll: true }), 350); };
   const close = () => { modal.classList.remove('on'); document.body.classList.remove('promo-open'); setTimeout(() => (modal.hidden = true), 300); };
   modal.querySelector('.promo-x').onclick = close;
   modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
@@ -77,10 +74,9 @@ export function promo() {
     err.textContent = ''; btn.disabled = true; btn.textContent = 'Надсилаємо…';
     try {
       await store.lead({ kind, name, phone: tel, page: location.pathname.split('/').pop() || 'index.html' });
-      ls.set(SENT);
+      try { localStorage.setItem(SENT, String(Date.now())); } catch {}
       $('#promoBody').innerHTML = `<div class="promo-done"><span class="promo-done-ic">${ICO.check}</span><h2 class="h2">Дякуємо${name ? ', ' + esc(name) : ''}!</h2><p class="promo-lead">Менеджер зателефонує вам найближчим часом, щоб домовитись про безкоштовну оцінку.</p><button class="btn line block" type="button" id="promoDone">Повернутися на сайт</button></div>`;
       $('#promoDone').onclick = close;
-      bar.hidden = true; document.body.classList.remove('has-promo-bar');
     } catch (x) {
       console.error(x);
       err.innerHTML = `Не вдалося надіслати. ${phone ? `Зателефонуйте нам: <a href="${telHref(phone)}">${esc(phone)}</a>` : 'Спробуйте ще раз.'}`;
@@ -89,9 +85,15 @@ export function promo() {
   };
 
   $('#promoOpen').onclick = open;
-  bar.querySelector('.promo-bar-x').onclick = () => { bar.classList.remove('on'); document.body.classList.remove('has-promo-bar'); ss.set(BAR_OFF); setTimeout(() => (bar.hidden = true), 300); };
+  bar.querySelector('.promo-bar-x').onclick = () => { bar.classList.remove('on'); document.body.classList.remove('has-promo-bar'); setTimeout(() => (bar.hidden = true), 300); };
 
-  if (ls.get(SENT)) return;
-  if (!ss.get(BAR_OFF)) { bar.hidden = false; document.body.classList.add('has-promo-bar'); setTimeout(() => bar.classList.add('on'), 1200); }
-  if (!ss.get(SEEN)) setTimeout(() => { if (modal.hidden && !document.body.classList.contains('menu-open')) open(); }, 3500);
+  // Банер — при кожному відкритті й оновленні сторінки (хрестик ховає його лише до наступного завантаження).
+  bar.hidden = false; document.body.classList.add('has-promo-bar'); setTimeout(() => bar.classList.add('on'), 1200);
+  // Вікно — при кожному новому заході на сайт і при оновленні сторінки, але не при переході між сторінками сайту.
+  // Хто вже залишив заявку, вікно 3 дні не бачить.
+  const nav = performance.getEntriesByType?.('navigation')?.[0]?.type;
+  let internal = false; try { internal = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch {}
+  const sentAt = +(ls.get(SENT) || 0);
+  const recentlySent = sentAt > 1 && Date.now() - sentAt < 3 * 864e5;
+  if (!recentlySent && (nav === 'reload' || !internal)) setTimeout(() => { if (modal.hidden && !document.body.classList.contains('menu-open')) open(); }, 3500);
 }
