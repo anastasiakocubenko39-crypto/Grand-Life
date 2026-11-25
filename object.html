@@ -48,15 +48,15 @@ function render() {
     !isLand && p.roomsNum && [p.roomsNum, 'кімнат'],
     !isLand && p.floor && [`${esc(p.floor)}${p.floors ? ' / ' + esc(p.floors) : ''}`, 'поверх'],
     isLand && p.purpose && [esc(shortPurpose(p.purpose)), 'призначення'],
-    p.landArea && !isLand && [`${esc(p.landArea)} сот`, 'ділянка'],
+    p.landArea && !isLand && [`${esc(p.landArea)} ${esc(p.landUnit || 'сот')}`, 'ділянка'],
     p.year && [esc(p.year), 'рік будівництва'],
   ].filter((x) => x && x[0]).slice(0, 4);
 
   const rows = [
     ['Тип', t.one], ['Угода', p.type === 'Оренда' ? 'Довгострокова оренда' : 'Продаж'],
     ['Локація', p.location], ['Адреса', p.address], ['Житловий комплекс / масив', p.complex],
-    ['Загальна площа', areaText(p)], ['Житлова площа', p.livingArea && p.livingArea + ' м²'], ['Площа кухні', p.kitchenArea && p.kitchenArea + ' м²'],
-    ['Площа ділянки', !isLand && p.landArea && p.landArea + ' сот'],
+    ['Загальна площа', areaText(p)], ['Житлова площа', p.livingArea && p.livingArea + ' ' + (p.livingUnit || 'м²')], ['Площа кухні', p.kitchenArea && p.kitchenArea + ' ' + (p.kitchenUnit || 'м²')],
+    ['Площа земельної ділянки', !isLand && p.landArea && p.landArea + ' ' + (p.landUnit || 'сот')],
     ['Кімнат', !isLand && p.rooms], ['Спалень', p.bedrooms], ['Санвузлів', p.bathrooms],
     ['Поверх', p.floor], ['Поверховість', p.floors], ['Рік будівництва / здачі', p.year],
     ['Стан', p.condition], ['Матеріал стін', p.walls], ['Опалення', p.heating], ['Висота стель', p.ceiling && p.ceiling + ' м'],
