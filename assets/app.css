@@ -397,3 +397,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .mobile-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--surface); box-shadow: 0 -10px 30px -10px rgba(0, 0, 0, .2); }
   body.has-bar { padding-bottom: 80px; }
 }
+
+/* Невисокі екрани ноутбуків: перший екран вміщає заголовок, цифри і пошук, вивіска на фото лишається відкритою. */
+@media (min-width: 761px) and (max-height: 860px) {
+  .hero .wrap { padding-top: 112px; padding-bottom: 34px; }
+  .hero .h1 { font-size: clamp(40px, 7.4vh, 76px); }
+  .hero .lead { margin-top: 14px; }
+  .hero-stats { margin-top: 24px; }
+  .hero-stats b { font-size: 34px; }
+  .qsearch { margin-top: 24px; }
+}
