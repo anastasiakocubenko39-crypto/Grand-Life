@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261134';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, fixPurpose, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261135';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -229,7 +229,7 @@ function openEditor(id) {
     areaValue: p?.areaValue ?? '', areaUnit: p?.areaUnit || 'м²', livingArea: d.livingArea || '', kitchenArea: d.kitchenArea || '', landArea: d.landArea || '',
     livingUnit: d.livingUnit || 'м²', kitchenUnit: d.kitchenUnit || 'м²', landUnit: d.landUnit || 'сот',
     rooms: d.rooms && d.rooms !== '—' ? d.rooms : '', bedrooms: d.bedrooms || '', bathrooms: d.bathrooms || '', floor: d.floor || '', floors: d.floors || '', year: d.year || '', ceiling: d.ceiling || '',
-    condition: d.condition || '', walls: d.walls || '', heating: d.heating || '', purpose: d.purpose || '', cadastre: d.cadastre || '',
+    condition: d.condition || '', walls: d.walls || '', heating: d.heating || '', purpose: fixPurpose(d.purpose), cadastre: d.cadastre || '',
     rentTerm: d.rentTerm || '', deposit: d.deposit || '', available: d.available || '',
     description: d.description || '', infrastructure: d.infrastructure || '', videoUrl: d.videoUrl || '', code: d.code || '',
     features: [...(p?.features || [])], featured: !!d.featured, sold: !!d.sold,
@@ -278,7 +278,7 @@ function openEditor(id) {
 
         <section class="card only-land"><h2><i>4</i>Про ділянку</h2><p class="hint">Цільове призначення і кадастровий номер підвищують довіру покупця.</p>
           <div class="fgrid">
-            <label class="f"><span>Цільове призначення</span><select class="field" data-k="purpose">${opt(PURPOSES, form.purpose)}</select></label>
+            <label class="f"><span>Цільове призначення</span><select class="field" data-k="purpose">${opt(PURPOSES.includes(form.purpose) || !form.purpose ? PURPOSES : [...PURPOSES, form.purpose], form.purpose)}</select></label>
             ${inp('cadastre', 'Кадастровий номер', '3222400000:00:000:0000')}
           </div></section>
 

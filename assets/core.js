@@ -17,7 +17,9 @@ export const PUBLIC_TYPES = TYPES.filter((t) => !t.hidden);
 export const CONDITIONS = ['Новобудова від забудовника', 'Дизайнерський ремонт', 'Євроремонт', 'Сучасний ремонт', 'Житловий стан', 'Під ремонт', 'Після будівельників'];
 export const WALLS = ['Цегла', 'Моноліт', 'Газоблок', 'Керамоблок', 'Панель', 'Дерево / каркас', 'Інше'];
 export const HEATING = ['Індивідуальне газове', 'Централізоване', 'Електричне', 'Тепловий насос', 'Твердопаливне', 'Комбіноване', 'Немає'];
-export const PURPOSES = ['Будівництво житлового будинку (ІЖБ)', 'Особисте селянське господарство', 'Садівництво', 'Комерційне призначення', 'Сільськогосподарське'];
+export const PURPOSES = ['Під будівництво житлового будинку (ІЖБ)', 'Особисте селянське господарство', 'Садівництво', 'Комерційне призначення'];
+/* Старі назви, збережені в об’єктах раніше, показуємо по-новому. */
+export const fixPurpose = (v) => (v === 'Будівництво житлового будинку (ІЖБ)' ? 'Під будівництво житлового будинку (ІЖБ)' : v || '');
 export const FEATURES = {
   'Комунікації': ['Світло', 'Газ', 'Вода (центральна)', 'Свердловина', 'Каналізація', 'Септик', 'Інтернет'],
   'Комфорт': ['Меблі', 'Побутова техніка', 'Кондиціонер', 'Тепла підлога', 'Камін', 'Гардеробна', 'Панорамні вікна'],
@@ -71,6 +73,7 @@ export function norm(id, d) {
   p.features = Array.isArray(d.features) ? d.features : [];
   p.title = d.title || 'Об’єкт без назви';
   p.location = d.location || '';
+  p.purpose = fixPurpose(d.purpose);
   return p;
 }
 
@@ -307,7 +310,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261134').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261135').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
