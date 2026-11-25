@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -177,6 +177,8 @@ const TEMPLATES = {
   'Комерція': 'Про приміщення\nПлоща, поверх, окремий вхід, висота стель, вітрини.\n\nПризначення\nОфіс, магазин, кафе, склад, салон — для чого підходить.\n\nТехнічні характеристики\nПотужність електрики, вентиляція, кондиціонування, санвузол.\n\nЛокація і трафік\nПішохідний / автомобільний трафік, паркінг, сусіди.\n\nУмови\nПродаж або оренда, документи, торг.',
 };
 
+const PAY_TERMS = ['Торг', 'Без торгу', 'Можлива іпотека', 'Можлива розстрочка', 'Торг, можлива іпотека', 'Торг, можлива розстрочка', 'Можлива іпотека або розстрочка', 'Торг, іпотека або розстрочка'];
+const UNITS = ['м²', 'сот', 'га'];
 let photos = []; // data URLs or http URLs
 let form = {};
 function openEditor(id) {
@@ -187,6 +189,7 @@ function openEditor(id) {
     type: p?.type || '', title: d.title || '', location: d.location || '', address: d.address || '', complex: d.complex || '',
     priceValue: p?.priceValue ?? '', currency: p?.currency || '$', priceNote: d.priceNote || '',
     areaValue: p?.areaValue ?? '', areaUnit: p?.areaUnit || 'м²', livingArea: d.livingArea || '', kitchenArea: d.kitchenArea || '', landArea: d.landArea || '',
+    livingUnit: d.livingUnit || 'м²', kitchenUnit: d.kitchenUnit || 'м²', landUnit: d.landUnit || 'сот',
     rooms: d.rooms && d.rooms !== '—' ? d.rooms : '', bedrooms: d.bedrooms || '', bathrooms: d.bathrooms || '', floor: d.floor || '', floors: d.floors || '', year: d.year || '', ceiling: d.ceiling || '',
     condition: d.condition || '', walls: d.walls || '', heating: d.heating || '', purpose: d.purpose || '', cadastre: d.cadastre || '',
     rentTerm: d.rentTerm || '', deposit: d.deposit || '', available: d.available || '',
@@ -195,13 +198,14 @@ function openEditor(id) {
   };
   photos = [...(p?.images || [])];
   const opt = (arr, v) => `<option value="">— не вказано —</option>` + arr.map((x) => `<option${x === v ? ' selected' : ''}>${esc(x)}</option>`).join('');
+  const areaInp = (k, u, label, ph) => `<label class="f"><span>${label}</span><div class="combo"><input class="field" data-k="${k}" inputmode="decimal" value="${esc(form[k])}" placeholder="${esc(ph)}"><select class="field" data-k="${u}">${UNITS.map((c) => `<option${c === form[u] ? ' selected' : ''}>${c}</option>`).join('')}</select></div></label>`;
   const inp = (k, label, ph = '', extra = '') => `<label class="f${extra}"><span>${label}</span><input class="field" data-k="${k}" value="${esc(form[k])}" placeholder="${esc(ph)}"></label>`;
   $('#main').innerHTML = `
     <div class="adm-top"><h1>${id ? 'Редагування' : 'Новий об’єкт'}</h1><button class="btn line sm" id="back">← До списку</button></div>
     <div class="editor">
       <div>
         <section class="card"><h2><i>1</i>Тип об’єкта <em style="color:#B3261E;font-style:normal">*</em></h2><p class="hint">Від типу залежить розділ сайту і поля нижче.</p>
-          <div class="types" id="types">${TYPES.map((t) => `<button type="button" data-t="${t.id}" aria-pressed="${form.type === t.id}">${t.one}</button>`).join('')}</div></section>
+          <div class="types" id="types">${TYPES.filter((t) => !t.hidden || t.id === form.type).map((t) => `<button type="button" data-t="${t.id}" aria-pressed="${form.type === t.id}">${t.one}</button>`).join('')}</div></section>
 
         <section class="card"><h2><i>2</i>Основне</h2><p class="hint">Назва з’являється в картці та на сторінці об’єкта.</p>
           <div class="fgrid">
@@ -215,11 +219,11 @@ function openEditor(id) {
         <section class="card"><h2><i>3</i>Ціна і площа</h2><p class="hint">Ціну вказуйте числом — так працюють фільтри і сортування на сайті.</p>
           <div class="fgrid">
             <label class="f"><span>Ціна</span><div class="combo"><input class="field" data-k="priceValue" inputmode="numeric" value="${esc(form.priceValue)}" placeholder="125000"><select class="field" data-k="currency">${['$', '€', '₴'].map((c) => `<option${c === form.currency ? ' selected' : ''}>${c}</option>`).join('')}</select></div><small id="rentHint">${form.type === 'Оренда' ? 'Для оренди — ціна за місяць.' : ''}</small></label>
-            ${inp('priceNote', 'Умови оплати', 'Торг, можлива іпотека / розстрочка')}
+            <label class="f"><span>Умови оплати</span><select class="field" data-k="priceNote">${opt(PAY_TERMS.includes(form.priceNote) || !form.priceNote ? PAY_TERMS : [form.priceNote, ...PAY_TERMS], form.priceNote)}</select></label>
             <label class="f"><span>Загальна площа</span><div class="combo"><input class="field" data-k="areaValue" inputmode="decimal" value="${esc(form.areaValue)}" placeholder="160"><select class="field" data-k="areaUnit">${['м²', 'сот', 'га'].map((c) => `<option${c === form.areaUnit ? ' selected' : ''}>${c}</option>`).join('')}</select></div></label>
-            <div class="f only-build">${inp('livingArea', 'Житлова площа, м²', '95')}</div>
-            <div class="f only-build">${inp('kitchenArea', 'Площа кухні, м²', '18')}</div>
-            <div class="f only-house">${inp('landArea', 'Площа ділянки, сот', '10')}</div>
+            <div class="f only-build">${areaInp('livingArea', 'livingUnit', 'Житлова площа', '95')}</div>
+            <div class="f only-build">${areaInp('kitchenArea', 'kitchenUnit', 'Площа кухні', '18')}</div>
+            <div class="f only-build">${areaInp('landArea', 'landUnit', 'Площа земельної ділянки', '10')}</div>
           </div></section>
 
         <section class="card only-build"><h2><i>4</i>Характеристики</h2><p class="hint">Заповнюйте все, що знаєте, — порожні поля на сайті не показуються.</p>
@@ -333,9 +337,8 @@ function data() {
     description: f.description.trim(), infrastructure: f.infrastructure.trim(), videoUrl: f.videoUrl.trim(),
     features: f.features, featured: !!f.featured, sold: !!f.sold,
   };
-  if (f.type !== 'Ділянка') Object.assign(out, { livingArea: f.livingArea, kitchenArea: f.kitchenArea, rooms: f.rooms || '—', bedrooms: f.bedrooms, bathrooms: f.bathrooms, floor: f.floor, floors: f.floors, year: f.year, ceiling: f.ceiling, condition: f.condition, walls: f.walls, heating: f.heating });
+  if (f.type !== 'Ділянка') Object.assign(out, { livingArea: f.livingArea, livingUnit: f.livingUnit, kitchenArea: f.kitchenArea, kitchenUnit: f.kitchenUnit, landArea: f.landArea, landUnit: f.landUnit, rooms: f.rooms || '—', bedrooms: f.bedrooms, bathrooms: f.bathrooms, floor: f.floor, floors: f.floors, year: f.year, ceiling: f.ceiling, condition: f.condition, walls: f.walls, heating: f.heating });
   else Object.assign(out, { rooms: '—', purpose: f.purpose, cadastre: f.cadastre });
-  if (f.type === 'Будинок') out.landArea = f.landArea;
   if (f.type === 'Оренда') Object.assign(out, { rentTerm: f.rentTerm, deposit: f.deposit, available: f.available });
   return out;
 }

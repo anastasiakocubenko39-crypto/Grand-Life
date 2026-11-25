@@ -23,13 +23,13 @@
       <span class="kicker rv" id="heroKicker"></span>
       <h1 class="h1 rv" style="--d:.1s" id="heroTitle"></h1>
       <p class="lead rv" style="--d:.2s" id="heroLead"></p>
-      <form class="qsearch rv" style="--d:.3s" action="catalog.html">
+      <div class="hero-stats rv" style="--d:.3s" id="heroStats"></div>
+      <form class="qsearch rv" style="--d:.4s" action="catalog.html">
         <label><span>Тип</span><select name="type" id="qType"><option value="">Усі об’єкти</option></select></label>
         <label><span>Локація</span><input name="q" placeholder="Місто, район, вулиця"></label>
-        <label><span>Бюджет до, $</span><input name="max" inputmode="numeric" placeholder="Будь-який"></label>
+        <label><span class="lbl-row">Бюджет до,<select name="cur" class="cur" aria-label="Валюта"><option value="$">$</option><option value="₴">₴</option></select></span><input name="max" inputmode="numeric" placeholder="Будь-який"></label>
         <button class="btn" type="submit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Шукати</button>
       </form>
-      <div class="hero-stats rv" style="--d:.4s" id="heroStats"></div>
     </div>
   </section>
 
@@ -84,7 +84,7 @@
   </section>
 </main>
 <script type="module">
-import { S, TYPES, I, esc, store, cardHTML, layout, reveal, telHref, $ } from './assets/core.js';
+import { S, PUBLIC_TYPES as TYPES, TYPE, I, esc, store, cardHTML, layout, reveal, telHref, $ } from './assets/core.js';
 layout({ page: 'home', overDark: true });
 $('#heroImg').src = S.heroImage;
 $('#heroKicker').textContent = S.heroKicker;
@@ -109,7 +109,7 @@ $('#contactList').innerHTML = [
 ].filter(Boolean).join('') + `<a class="btn" href="catalog.html" style="margin-top:14px;justify-content:center">Переглянути об’єкти</a>`;
 
 let all = [];
-try { all = await store.all(); } catch (e) { console.error(e); }
+try { all = (await store.all()).filter((p) => !TYPE[p.type]?.hidden); } catch (e) { console.error(e); }
 $('#cats').innerHTML = TYPES.filter((t) => t.img).map((t, i) => {
   const n = all.filter((p) => p.type === t.id && !p.sold).length;
   return `<a class="cat rv" style="--d:${i * .07}s" href="catalog.html?type=${encodeURIComponent(t.id)}"><img src="${t.img}" alt="" loading="lazy">${n ? `<i>${n} в наявності</i>` : ''}<b>${t.label}</b><span>${t.note}</span></a>`;

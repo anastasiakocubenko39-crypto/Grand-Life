@@ -87,6 +87,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .qsearch select, .qsearch input { border: 0; background: transparent; padding: 4px 0; font-size: 15.5px; font-weight: 500; outline: none; width: 100%; }
 .qsearch .btn { border-radius: calc(var(--card-radius) - 6px); }
 .hero-stats { display: flex; gap: 46px; margin-top: 48px; flex-wrap: wrap; }
+.qsearch select.cur { width: auto; padding: 0 0 0 6px; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--muted); cursor: pointer; }
+.qsearch .lbl-row { display: flex; align-items: center; gap: 2px; }
+.cur-switch { display: inline-flex; gap: 4px; margin-left: 8px; vertical-align: middle; }
+.cur-switch button { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 1px 9px; font: inherit; font-size: 12px; cursor: pointer; color: var(--muted); letter-spacing: 0; text-transform: none; }
+.cur-switch button[aria-pressed="true"] { background: var(--heading); color: #fff; border-color: var(--heading); }
 .hero-stats b { display: block; font-family: var(--display); font-size: 40px; font-weight: 500; line-height: 1; color: #fff; }
 .hero-stats span { font-size: 13px; color: rgba(255, 255, 255, .7); }
 
@@ -129,6 +134,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .pcard-body { padding: 20px 22px 22px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .price { font-family: var(--display); font-size: 28px; font-weight: 500; color: var(--heading); line-height: 1.1; }
 .price small { font-family: var(--sans); font-size: 13px; color: var(--muted); font-weight: 500; }
+.price-alt { display: block; margin-top: 4px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
 .pcard h3 { margin: 0; font-size: 16.5px; font-weight: 600; line-height: 1.35; color: var(--heading); }
 .loc { display: flex; gap: 6px; align-items: flex-start; font-size: 14px; color: var(--muted); }
 .loc svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--accent-ink); }
@@ -390,4 +396,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .lb-btn { display: none; }
   .mobile-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--surface); box-shadow: 0 -10px 30px -10px rgba(0, 0, 0, .2); }
   body.has-bar { padding-bottom: 80px; }
+}
+
+/* Невисокі екрани ноутбуків: перший екран вміщає заголовок, цифри і пошук, вивіска на фото лишається відкритою. */
+@media (min-width: 761px) and (max-height: 860px) {
+  .hero .wrap { padding-top: 112px; padding-bottom: 34px; }
+  .hero .h1 { font-size: clamp(40px, 7.4vh, 76px); }
+  .hero .lead { margin-top: 14px; }
+  .hero-stats { margin-top: 24px; }
+  .hero-stats b { font-size: 34px; }
+  .qsearch { margin-top: 24px; }
 }

@@ -26,7 +26,7 @@
       <div class="fgroup"><span>Тип об’єкта</span><div class="chips" id="fType"></div></div>
       <div class="fgroup"><span>Пошук</span><input class="field" id="fQ" placeholder="Назва, місто, район"></div>
       <div class="fgroup"><span>Локація</span><select class="field" id="fLoc"><option value="">Усі локації</option></select></div>
-      <div class="fgroup"><span>Ціна, $</span><div class="range"><input class="field" id="fMin" inputmode="numeric" placeholder="від"><input class="field" id="fMax" inputmode="numeric" placeholder="до"></div></div>
+      <div class="fgroup"><span>Ціна<span class="cur-switch" id="fCur"><button type="button" data-v="$">$</button><button type="button" data-v="₴">₴</button></span></span><div class="range"><input class="field" id="fMin" inputmode="numeric" placeholder="від"><input class="field" id="fMax" inputmode="numeric" placeholder="до"></div></div>
       <div class="fgroup"><span>Площа, м²</span><div class="range"><input class="field" id="fAMin" inputmode="numeric" placeholder="від"><input class="field" id="fAMax" inputmode="numeric" placeholder="до"></div></div>
       <div class="fgroup" id="roomsGroup"><span>Кімнат</span><div class="chips" id="fRooms"></div></div>
       <div class="fgroup"><span>Стан</span><select class="field" id="fCond"><option value="">Будь-який</option></select></div>
@@ -52,14 +52,14 @@
   </div>
 </main>
 <script type="module">
-import { S, TYPES, TYPE, CONDITIONS, I, esc, store, cardHTML, layout, reveal, $, $$ } from './assets/core.js';
+import { S, PUBLIC_TYPES as TYPES, TYPE, CONDITIONS, I, esc, store, cardHTML, layout, reveal, $, $$ } from './assets/core.js';
 layout({ page: 'catalog' });
 $('#openF').innerHTML = I.filter + 'Фільтри'; $('#vGrid').innerHTML = I.grid; $('#vList').innerHTML = I.list;
 const QUICK = ['Можлива іпотека', 'Можлива розстрочка', 'Укриття', 'Генератор / автономність', 'Паркінг', 'Тераса', 'Меблі', 'Можна з тваринами'];
 const params = new URLSearchParams(location.search);
 const st = {
   type: params.get('type') || '', q: params.get('q') || '', loc: params.get('loc') || '',
-  min: params.get('min') || '', max: params.get('max') || '', amin: params.get('amin') || '', amax: params.get('amax') || '',
+  cur: params.get('cur') === '₴' ? '₴' : '$', min: params.get('min') || '', max: params.get('max') || '', amin: params.get('amin') || '', amax: params.get('amax') || '',
   rooms: params.get('rooms') || '', cond: params.get('cond') || '', feat: (params.get('feat') || '').split('|').filter(Boolean),
   photo: params.get('photo') === '1', sold: params.get('sold') === '1', sort: params.get('sort') || 'new', view: localStorage.getItem('view') || 'grid',
 };
@@ -74,6 +74,7 @@ function syncUI() {
   $$('#fType .chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.v === st.type));
   $$('#fRooms .chip').forEach((c) => c.setAttribute('aria-pressed', c.dataset.v === st.rooms));
   $$('#fFeat .chip').forEach((c) => c.setAttribute('aria-pressed', st.feat.includes(c.dataset.v)));
+  $$('#fCur button').forEach((c) => c.setAttribute('aria-pressed', c.dataset.v === st.cur));
   $('#fQ').value = st.q; $('#fLoc').value = st.loc; $('#fMin').value = st.min; $('#fMax').value = st.max; $('#fAMin').value = st.amin; $('#fAMax').value = st.amax;
   $('#fCond').value = st.cond; $('#fPhoto').checked = st.photo; $('#fSold').checked = st.sold; $('#sort').value = st.sort;
   $('#roomsGroup').hidden = st.type === 'Ділянка';
@@ -90,8 +91,8 @@ function apply() {
     && (!st.type || p.type === st.type)
     && (!q || `${p.title} ${p.location} ${p.address || ''} ${p.description || ''}`.toLowerCase().includes(q))
     && (!st.loc || p.location === st.loc)
-    && (n(st.min) == null || (p.usd != null && p.usd >= n(st.min)))
-    && (n(st.max) == null || (p.usd != null && p.usd <= n(st.max)))
+    && (n(st.min) == null || (price(p) != null && price(p) >= n(st.min)))
+    && (n(st.max) == null || (price(p) != null && price(p) <= n(st.max)))
     && (n(st.amin) == null || (p.areaValue != null && toM2(p) >= n(st.amin)))
     && (n(st.amax) == null || (p.areaValue != null && toM2(p) <= n(st.amax)))
     && (!st.rooms || (st.rooms === '4' ? p.roomsNum >= 4 : p.roomsNum === +st.rooms))
@@ -111,16 +112,19 @@ function apply() {
   tags(); reveal(grid);
   const qs = new URLSearchParams();
   for (const k of ['type', 'q', 'loc', 'min', 'max', 'amin', 'amax', 'rooms', 'cond']) if (st[k]) qs.set(k, st[k]);
+  if (st.cur !== '$' && (st.min || st.max)) qs.set('cur', st.cur);
   if (st.feat.length) qs.set('feat', st.feat.join('|')); if (st.photo) qs.set('photo', 1); if (st.sold) qs.set('sold', 1); if (st.sort !== 'new') qs.set('sort', st.sort);
   history.replaceState(null, '', location.pathname + (qs.toString() ? '?' + qs : ''));
 }
+const price = (p) => (st.cur === '₴' ? p.uah : p.usd); // ціни всіх об’єктів переводяться за курсом НБУ
 const toM2 = (p) => (p.areaValue == null ? null : p.areaUnit === 'сот' ? p.areaValue * 100 : p.areaUnit === 'га' ? p.areaValue * 10000 : p.areaValue);
 const activeCount = () => ['type', 'q', 'loc', 'min', 'max', 'amin', 'amax', 'rooms', 'cond'].filter((k) => st[k]).length + st.feat.length + (st.photo ? 1 : 0);
 function tags() {
   const t = [];
   if (st.type) t.push(['type', TYPE[st.type]?.label]);
   if (st.q) t.push(['q', `«${st.q}»`]); if (st.loc) t.push(['loc', st.loc]);
-  if (st.min || st.max) t.push(['price', `$${st.min || 0} – ${st.max ? '$' + st.max : '∞'}`]);
+  const money = (v) => (st.cur === '₴' ? `${v} ₴` : `$${v}`);
+  if (st.min || st.max) t.push(['price', `${money(st.min || 0)} – ${st.max ? money(st.max) : '∞'}`]);
   if (st.amin || st.amax) t.push(['areaR', `${st.amin || 0} – ${st.amax || '∞'} м²`]);
   if (st.rooms) t.push(['rooms', `${st.rooms}${st.rooms === '4' ? '+' : ''} кімн.`]); if (st.cond) t.push(['cond', st.cond]);
   st.feat.forEach((f) => t.push(['feat:' + f, f])); if (st.photo) t.push(['photo', 'з фото']);
@@ -134,6 +138,7 @@ $('#tags').addEventListener('click', (e) => {
 });
 function reset() { Object.assign(st, { type: '', q: '', loc: '', min: '', max: '', amin: '', amax: '', rooms: '', cond: '', feat: [], photo: false, sold: false }); syncUI(); apply(); }
 $('#reset').onclick = reset;
+$('#fCur').onclick = (e) => { const c = e.target.closest('button'); if (!c) return; st.cur = c.dataset.v; syncUI(); apply(); };
 $('#fType').onclick = (e) => { const c = e.target.closest('.chip'); if (!c) return; st.type = c.dataset.v; syncUI(); apply(); };
 $('#fRooms').onclick = (e) => { const c = e.target.closest('.chip'); if (!c) return; st.rooms = c.dataset.v; syncUI(); apply(); };
 $('#fFeat').onclick = (e) => { const c = e.target.closest('.chip'); if (!c) return; const v = c.dataset.v; st.feat = st.feat.includes(v) ? st.feat.filter((f) => f !== v) : [...st.feat, v]; syncUI(); apply(); };
@@ -155,7 +160,7 @@ $('#openF').onclick = () => { F.classList.add('open'); document.body.style.overf
 $('#apply').onclick = () => { F.classList.remove('open'); document.body.style.overflow = ''; scrollTo({ top: 0, behavior: 'smooth' }); };
 
 syncUI();
-try { ALL = await store.all(); } catch (e) { console.error(e); $('#grid').innerHTML = '<div class="empty"><b>Не вдалося завантажити</b>Перевірте з’єднання та оновіть сторінку.</div>'; }
+try { ALL = (await store.all()).filter((p) => !TYPE[p.type]?.hidden || p.type === st.type); } catch (e) { console.error(e); $('#grid').innerHTML = '<div class="empty"><b>Не вдалося завантажити</b>Перевірте з’єднання та оновіть сторінку.</div>'; }
 const locs = [...new Set(ALL.map((p) => p.location.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'uk'));
 $('#fLoc').insertAdjacentHTML('beforeend', locs.map((l) => `<option>${esc(l)}</option>`).join(''));
 $('#fLoc').value = st.loc;

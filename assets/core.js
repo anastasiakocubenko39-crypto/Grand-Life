@@ -7,10 +7,12 @@ export const TYPES = [
   { id: 'Будинок', label: 'Будинки', one: 'Будинок', note: 'Приватні будинки та котеджі', img: S.catImages?.['Будинок'] },
   { id: 'Квартира', label: 'Квартири', one: 'Квартира', note: 'Новобудови та вторинний ринок', img: S.catImages?.['Квартира'] },
   { id: 'Ділянка', label: 'Ділянки', one: 'Ділянка', note: 'Земля під забудову та відпочинок', img: S.catImages?.['Ділянка'] },
-  { id: 'Оренда', label: 'Оренда', one: 'Оренда', note: 'Довгострокова оренда житла', img: S.catImages?.['Оренда'] },
+  { id: 'Оренда', label: 'Оренда', one: 'Оренда', note: 'Довгострокова оренда житла', img: S.catImages?.['Оренда'], hidden: true },
   { id: 'Комерція', label: 'Комерція', one: 'Комерційна', note: 'Офіси, магазини, склади', img: S.catImages?.['Комерція'] },
 ];
 export const TYPE = Object.fromEntries(TYPES.map((t) => [t.id, t]));
+/* Типи, які показуються відвідувачам (Оренду прибрано з сайту, старі об’єкти оренди лишаються доступні за посиланням). */
+export const PUBLIC_TYPES = TYPES.filter((t) => !t.hidden);
 
 export const CONDITIONS = ['Новобудова від забудовника', 'Дизайнерський ремонт', 'Євроремонт', 'Сучасний ремонт', 'Житловий стан', 'Під ремонт', 'Після будівельників'];
 export const WALLS = ['Цегла', 'Моноліт', 'Газоблок', 'Керамоблок', 'Панель', 'Дерево / каркас', 'Інше'];
@@ -33,7 +35,24 @@ export const safeImg = (u) => { u = String(u || '').trim(); if (!u) return ''; i
 const toDate = (v) => (v?.toDate ? v.toDate() : v?.seconds ? new Date(v.seconds * 1000) : v ? new Date(v) : null);
 const num = (v) => { if (v === '' || v == null) return null; const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.').replace(/[^\d.]/g, '')); return isFinite(n) ? n : null; };
 export const fmt = (n) => (n == null ? '' : Math.round(n).toLocaleString('uk-UA').replace(/,/g, ' '));
+/* Курс НБУ на сьогодні (кешується в браузері на добу). Якщо НБУ недоступний — запасний курс. */
 const RATE = { '$': 1, '€': 1.08, '₴': 1 / 41.5 };
+export const FX = { usd: 41.5, eur: 44.8, date: '', live: false };
+await (async () => {
+  const day = new Date().toISOString().slice(0, 10);
+  let r = null;
+  try { r = JSON.parse(localStorage.getItem('nbu_rate') || 'null'); } catch {}
+  if (!r || r.day !== day) {
+    try {
+      const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500);
+      const list = await (await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json', { signal: ctl.signal })).json();
+      clearTimeout(t);
+      const get = (c) => list.find((x) => x.cc === c)?.rate;
+      if (get('USD')) { r = { day, usd: get('USD'), eur: get('EUR') || get('USD') * 1.08, date: list[0]?.exchangedate || '' }; try { localStorage.setItem('nbu_rate', JSON.stringify(r)); } catch {} }
+    } catch {}
+  }
+  if (r?.usd) { Object.assign(FX, { usd: r.usd, eur: r.eur, date: r.date, live: true }); RATE['₴'] = 1 / r.usd; RATE['€'] = r.eur / r.usd; }
+})();
 
 export function norm(id, d) {
   const p = { ...d, id };
@@ -43,6 +62,7 @@ export function norm(id, d) {
   else if (d.price) { p.priceValue = num(String(d.price).match(/[\d\s.,]+/)?.[0]); p.currency = /€/.test(d.price) ? '€' : /₴|грн|uah/i.test(d.price) ? '₴' : '$'; }
   else { p.priceValue = null; p.currency = '$'; }
   p.usd = p.priceValue != null ? p.priceValue * RATE[p.currency] : null;
+  p.uah = p.usd != null ? p.usd * FX.usd : null;
   if (d.areaValue != null && d.areaValue !== '') { p.areaValue = num(d.areaValue); p.areaUnit = d.areaUnit || 'м²'; }
   else if (d.area) { p.areaValue = num(String(d.area).match(/[\d\s.,]+/)?.[0]); p.areaUnit = /сот/.test(d.area) ? 'сот' : /га/.test(d.area) ? 'га' : 'м²'; }
   else { p.areaValue = null; p.areaUnit = 'м²'; }
@@ -54,9 +74,11 @@ export function norm(id, d) {
   return p;
 }
 
+/* Друга валюта: для цін у $ / € — гривні за курсом НБУ, для гривень — долари. */
+export const altPrice = (p) => p.priceValue == null ? '' : p.currency === '₴' ? `≈ $${fmt(p.usd)}` : `≈ ${fmt(p.uah)} ₴`;
 export const priceHTML = (p, cls = '') => p.priceValue == null ? `<span class="price ${cls}">Ціна за запитом</span>`
-  : `<span class="price ${cls}">${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' <small>/ місяць</small>' : ''}</span>`;
-export const priceText = (p) => p.priceValue == null ? 'За запитом' : `${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' / міс' : ''}`;
+  : `<span class="price ${cls}">${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' <small>/ місяць</small>' : ''}<span class="price-alt" title="За курсом НБУ${FX.date ? ' на ' + FX.date : ''}">${altPrice(p)}${p.type === 'Оренда' ? ' / міс' : ''}</span></span>`;
+export const priceText = (p) => p.priceValue == null ? 'За запитом' : `${p.currency === '₴' ? '' : p.currency}${fmt(p.priceValue)}${p.currency === '₴' ? ' ₴' : ''}${p.type === 'Оренда' ? ' / міс' : ''} (${altPrice(p)})`;
 export const areaText = (p) => (p.areaValue != null ? `${String(p.areaValue).replace('.', ',')} ${p.areaUnit}` : '');
 
 /* ── icons ── */
@@ -219,7 +241,7 @@ export function layout({ page = '', overDark = false } = {}) {
   document.body.insertAdjacentHTML('beforeend', `
   <footer class="ftr"><div class="wrap"><div class="ftr-grid">
     <div><a class="logo" href="index.html"><img src="${S.logoLight}" alt="${esc(S.name)}" style="height:calc(var(--logo-h,44px) * 1.1)"></a><p>${esc(S.footerText)}</p></div>
-    <div><h5>Об’єкти</h5><ul>${TYPES.map((t) => `<li><a href="catalog.html?type=${encodeURIComponent(t.id)}">${t.label}</a></li>`).join('')}</ul></div>
+    <div><h5>Об’єкти</h5><ul>${PUBLIC_TYPES.map((t) => `<li><a href="catalog.html?type=${encodeURIComponent(t.id)}">${t.label}</a></li>`).join('')}</ul></div>
     <div><h5>Компанія</h5><ul><li><a href="about.html">Про нас</a></li><li><a href="about.html?to=process">Як ми працюємо</a></li><li><a href="about.html?to=faq">Питання і відповіді</a></li><li><a href="index.html?to=contacts">Контакти</a></li></ul></div>
     <div><h5>Контакти</h5><ul>${(S.phones || []).map((p) => `<li><a href="${telHref(p)}">${esc(p)}</a></li>`).join('')}${S.email ? `<li><a href="mailto:${esc(S.email)}">${esc(S.email)}</a></li>` : ''}${S.instagram ? `<li><a href="https://instagram.com/${esc(S.instagram)}" target="_blank" rel="noopener">@${esc(S.instagram)}</a></li>` : ''}<li>${esc(S.region || '')}</li></ul></div>
   </div><div class="ftr-bottom"><span>© ${new Date().getFullYear()} ${esc(S.name)}. Усі права захищені.</span><a href="admin.html">Вхід для менеджера</a></div></div></footer>`);
