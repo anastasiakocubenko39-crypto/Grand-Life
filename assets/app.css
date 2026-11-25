@@ -561,3 +561,10 @@ body.landing { min-height: 100dvh; display: flex; flex-direction: column; backgr
 }
 .legal-order .contact-list a { color: var(--heading); border-color: var(--line); }
 .legal-order .contact-list a:hover { color: var(--accent-ink); }
+
+/* Калькулятор іпотеки: програми фінансування */
+.calc-progs { display: flex; flex-wrap: wrap; gap: 6px; }
+.calc-progs button { padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--line-strong); background: var(--bg); color: var(--heading); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.calc-progs button[aria-pressed="true"] { background: var(--heading); border-color: var(--heading); color: #fff; }
+.calc-note { font-size: 12.5px; color: var(--muted); margin-top: -4px; }
+.calc output small { font-family: var(--sans); font-size: 14px; color: var(--muted); }

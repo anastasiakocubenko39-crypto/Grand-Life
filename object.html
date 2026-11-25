@@ -8,9 +8,9 @@
 <link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261131">
-<link rel="stylesheet" href="assets/app.css?v=20261131">
-<script src="config.js?v=20261131"></script>
+<link rel="stylesheet" href="theme.css?v=20261132">
+<link rel="stylesheet" href="assets/app.css?v=20261132">
+<script src="config.js?v=20261132"></script>
 </head>
 <body class="has-bar">
 <main class="obj"><div class="wrap" id="root"><div class="skeleton" style="min-height:520px;margin-top:30px"></div></div></main>
@@ -20,7 +20,7 @@
   <div class="lb-thumbs" id="lbThumbs"></div>
 </div>
 <script type="module">
-import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261131';
+import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261132';
 layout({ page: 'catalog' });
 $('#lbClose').innerHTML = I.x; $('#lbPrev').innerHTML = I.left; $('#lbNext').innerHTML = I.right;
 const id = new URLSearchParams(location.search).get('id');
@@ -61,7 +61,7 @@ function render() {
     ['Поверх', p.floor], ['Поверховість', p.floors], ['Рік будівництва / здачі', p.year],
     ['Стан', p.condition], ['Матеріал стін', p.walls], ['Опалення', p.heating], ['Висота стель', p.ceiling && p.ceiling + ' м'],
     ['Цільове призначення', p.purpose], ['Кадастровий номер', p.cadastre],
-    ['Ціна', priceText(p)], ['Ціна за одиницю', perM2], ['Умови оплати', p.priceNote],
+    ['Ціна', priceText(p)], ['Ціна за одиницю', perM2], ['Умови оплати', p.priceNote], ['Програми фінансування', progs.map(([n]) => n).join(', ')],
     ['Мінімальний строк оренди', p.rentTerm], ['Застава / комісія', p.deposit],
     ['Доступний з', p.available], ['Код об’єкта', p.code || p.id.slice(0, 6).toUpperCase()],
   ].filter(([, v]) => v !== undefined && v !== null && String(v).trim() && v !== '—');
@@ -70,6 +70,8 @@ function render() {
   const paras = String(p.description || '').split(/\n{2,}/).map((x) => x.trim()).filter(Boolean);
   const mapQ = encodeURIComponent([p.address, p.location].filter(Boolean).join(', '));
   const phone = S.phones?.[0];
+  // Програми фінансування, які менеджер відмітив для цього об’єкта (порядок — як у config.js)
+  const progs = (S.financePrograms || []).filter(([n]) => Array.isArray(p?.finance) && p.finance.includes(n));
   const msg = encodeURIComponent(`Добрий день! Цікавить об’єкт «${p.title}» (${location.href})`);
 
   root.innerHTML = `
@@ -106,11 +108,13 @@ function render() {
             <button class="btn line sm" id="share">${I.share}Поділитися</button>
           </div>
         </div>
-        ${p.priceValue && p.type !== 'Оренда' && !p.sold ? `<div class="side-card rv calc" id="calc">
+        ${p.priceValue && p.type !== 'Оренда' && !p.sold && progs.length ? `<div class="side-card rv calc" id="calc">
           <b style="font-size:17px;color:var(--heading)">Розрахунок іпотеки</b>
-          <label>Перший внесок: <span id="cDownT"></span><input type="range" id="cDown" min="10" max="70" value="30" step="5"></label>
-          <label>Строк: <span id="cYearsT"></span><input type="range" id="cYears" min="1" max="20" value="10"></label>
-          <label>Ставка: <span id="cRateT"></span><input type="range" id="cRate" min="3" max="25" value="${S.mortgageRate || 7}" step="0.5"></label>
+          <div class="calc-progs" id="cProgs">${progs.map(([n, , , , note], i) => `<button type="button" data-i="${i}" aria-pressed="${i === 0}" title="${esc(note || '')}">${esc(n)}</button>`).join('')}</div>
+          <span class="calc-note" id="cNote"></span>
+          <label>Перший внесок: <span id="cDownT"></span><input type="range" id="cDown" min="10" max="70" value="${progs[0][2] || 30}" step="5"></label>
+          <label>Строк: <span id="cYearsT"></span><input type="range" id="cYears" min="1" max="25" value="${progs[0][3] || 10}"></label>
+          <label>Ставка: <span id="cRateT"></span><input type="range" id="cRate" min="1" max="25" value="${progs[0][1] || S.mortgageRate || 7}" step="0.5"></label>
           <div><span style="font-size:13px;color:var(--muted)">Щомісячний платіж</span><output id="cOut"></output></div>
           <span style="font-size:12px;color:var(--muted)">Орієнтовно. Точні умови — у банку, допоможемо з оформленням.</span>
         </div>` : ''}
@@ -131,9 +135,16 @@ function render() {
       const pay = rate ? loan * rate / (1 - Math.pow(1 + rate, -n)) : loan / n;
       $('#cDownT').textContent = `${down}% · ${p.currency}${fmt(p.priceValue * down / 100)}`;
       $('#cYearsT').textContent = `${years} р.`; $('#cRateT').textContent = `${$('#cRate').value}% річних`;
-      $('#cOut').textContent = `${p.currency}${fmt(pay)}`;
+      $('#cOut').innerHTML = `${p.currency === '₴' ? '' : p.currency}${fmt(pay)}${p.currency === '₴' ? ' ₴' : ''}${p.currency !== '₴' && p.uah ? `<small> ≈ ${fmt(pay * p.uah / p.priceValue)} ₴</small>` : ''}`;
     };
-    $$('#calc input').forEach((i) => (i.oninput = upd)); upd();
+    const pick = (i) => {
+      const [, rate, down, years, note] = progs[i];
+      $$('#cProgs button').forEach((b) => b.setAttribute('aria-pressed', +b.dataset.i === i));
+      if (rate) $('#cRate').value = rate; if (down) $('#cDown').value = down; if (years) $('#cYears').value = years;
+      $('#cNote').textContent = note || ''; upd();
+    };
+    $('#cProgs').onclick = (e) => { const b = e.target.closest('[data-i]'); if (b) pick(+b.dataset.i); };
+    $$('#calc input').forEach((i) => (i.oninput = upd)); pick(0);
   }
 
   // lightbox

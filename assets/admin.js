@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261131';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261132';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -233,6 +233,7 @@ function openEditor(id) {
     rentTerm: d.rentTerm || '', deposit: d.deposit || '', available: d.available || '',
     description: d.description || '', infrastructure: d.infrastructure || '', videoUrl: d.videoUrl || '', code: d.code || '',
     features: [...(p?.features || [])], featured: !!d.featured, sold: !!d.sold,
+    finance: Array.isArray(d.finance) ? [...d.finance] : [],
   };
   photos = [...(p?.images || [])];
   const opt = (arr, v) => `<option value="">— не вказано —</option>` + arr.map((x) => `<option${x === v ? ' selected' : ''}>${esc(x)}</option>`).join('');
@@ -257,6 +258,7 @@ function openEditor(id) {
         <section class="card"><h2><i>3</i>Ціна і площа</h2><p class="hint">Ціну вказуйте числом — так працюють фільтри і сортування на сайті.</p>
           <div class="fgrid">
             <label class="f"><span>Ціна</span><div class="combo"><input class="field" data-k="priceValue" inputmode="numeric" value="${esc(form.priceValue)}" placeholder="125000"><select class="field" data-k="currency">${['$', '€', '₴'].map((c) => `<option${c === form.currency ? ' selected' : ''}>${c}</option>`).join('')}</select></div><small id="rentHint">${form.type === 'Оренда' ? 'Для оренди — ціна за місяць.' : ''}</small></label>
+            <div class="f full"><span>Програми фінансування</span><div class="chips" id="finChips">${(S.financePrograms || []).map(([n]) => `<button type="button" class="chip" data-fin="${esc(n)}" aria-pressed="${form.finance.includes(n)}">${esc(n)}</button>`).join('')}</div><small>Якщо відмітити хоч одну — на сторінці об’єкта з’явиться калькулятор іпотеки з цими програмами. Нічого не відмічено — калькулятора немає.</small></div>
             <label class="f"><span>Умови оплати</span><select class="field" data-k="priceNote">${opt(PAY_TERMS.includes(form.priceNote) || !form.priceNote ? PAY_TERMS : [form.priceNote, ...PAY_TERMS], form.priceNote)}</select></label>
             <label class="f"><span>Загальна площа</span><div class="combo"><input class="field" data-k="areaValue" inputmode="decimal" value="${esc(form.areaValue)}" placeholder="160"><select class="field" data-k="areaUnit">${['м²', 'сот', 'га'].map((c) => `<option${c === form.areaUnit ? ' selected' : ''}>${c}</option>`).join('')}</select></div></label>
             <div class="f only-build">${areaInp('livingArea', 'livingUnit', 'Житлова площа', '95')}</div>
@@ -321,6 +323,7 @@ function openEditor(id) {
   });
   $('#main').addEventListener('change', (e) => { const k = e.target.dataset.k; if (k) { form[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; dirty = true; refresh(); } });
   $('#types').onclick = (e) => { const b = e.target.closest('[data-t]'); if (!b) return; form.type = b.dataset.t; $$('#types button').forEach((x) => x.setAttribute('aria-pressed', x === b)); dirty = true; refresh(); };
+  $$('#finChips .chip').forEach((c) => (c.onclick = () => { const n = c.dataset.fin; form.finance = form.finance.includes(n) ? form.finance.filter((x) => x !== n) : [...form.finance, n]; c.setAttribute('aria-pressed', form.finance.includes(n)); dirty = true; refresh(); }));
   $$('.feat-groups .chip').forEach((c) => (c.onclick = () => { const f = c.dataset.f; form.features = form.features.includes(f) ? form.features.filter((x) => x !== f) : [...form.features, f]; c.setAttribute('aria-pressed', form.features.includes(f)); dirty = true; refresh(); }));
   $('#tpl').onclick = () => {
     if (!form.type) { alert('Спочатку оберіть тип об’єкта.'); return; }
@@ -374,6 +377,7 @@ function data() {
     areaValue, areaUnit: f.areaUnit, area: areaValue != null ? `${areaValue} ${f.areaUnit}` : '',
     description: f.description.trim(), infrastructure: f.infrastructure.trim(), videoUrl: f.videoUrl.trim(),
     features: f.features, featured: !!f.featured, sold: !!f.sold,
+    finance: (S.financePrograms || []).map(([n]) => n).filter((n) => f.finance.includes(n)),
   };
   if (f.type !== 'Ділянка') Object.assign(out, { livingArea: f.livingArea, livingUnit: f.livingUnit, kitchenArea: f.kitchenArea, kitchenUnit: f.kitchenUnit, landArea: f.landArea, landUnit: f.landUnit, rooms: f.rooms || '—', bedrooms: f.bedrooms, bathrooms: f.bathrooms, floor: f.floor, floors: f.floors, year: f.year, ceiling: f.ceiling, condition: f.condition, walls: f.walls, heating: f.heating });
   else Object.assign(out, { rooms: '—', purpose: f.purpose, cadastre: f.cadastre });
