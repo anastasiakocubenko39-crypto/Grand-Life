@@ -8,7 +8,7 @@ export const TYPES = [
   { id: 'Квартира', label: 'Квартири', one: 'Квартира', note: 'Новобудови та вторинний ринок', img: S.catImages?.['Квартира'] },
   { id: 'Ділянка', label: 'Ділянки', one: 'Ділянка', note: 'Земля під забудову та відпочинок', img: S.catImages?.['Ділянка'] },
   { id: 'Оренда', label: 'Оренда', one: 'Оренда', note: 'Довгострокова оренда житла', img: S.catImages?.['Оренда'], hidden: true },
-  { id: 'Комерція', label: 'Комерція', one: 'Комерційна', note: 'Офіси, магазини, склади', img: S.catImages?.['Комерція'] },
+  { id: 'Комерція', label: 'Комерційна нерухомість', one: 'Комерційна нерухомість', note: 'Офіси, магазини, склади', img: S.catImages?.['Комерція'] },
 ];
 export const TYPE = Object.fromEntries(TYPES.map((t) => [t.id, t]));
 /* Типи, які показуються відвідувачам (Оренду прибрано з сайту, старі об’єкти оренди лишаються доступні за посиланням). */
@@ -302,7 +302,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261129').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261130').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
