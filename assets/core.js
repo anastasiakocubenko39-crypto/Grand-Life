@@ -21,7 +21,7 @@ export const PURPOSES = ['Під будівництво житлового бу�
 /* Старі назви, збережені в об’єктах раніше, показуємо по-новому. */
 export const fixPurpose = (v) => (v === 'Будівництво житлового будинку (ІЖБ)' ? 'Під будівництво житлового будинку (ІЖБ)' : v || '');
 export const FEATURES = {
-  'Комунікації': ['Світло', 'Газ', 'Вода (центральна)', 'Свердловина', 'Каналізація', 'Септик', 'Інтернет'],
+  'Комунікації': ['Світло', 'Газ', 'Вода (центральна)', 'Свердловина', 'Каналізація', 'Септик', 'Wi-Fi'],
   'Комфорт': ['Меблі', 'Побутова техніка', 'Кондиціонер', 'Тепла підлога', 'Камін', 'Гардеробна', 'Панорамні вікна'],
   'Простір': ['Балкон', 'Лоджія', 'Тераса', 'Сад', 'Басейн', 'Лазня / сауна', 'Гараж', 'Паркінг', 'Комора'],
   'Будинок і безпека': ['Ліфт', 'Укриття', 'Генератор / автономність', 'Охорона', 'Відеоспостереження', 'Закрита територія', 'Консьєрж'],
@@ -70,7 +70,7 @@ export function norm(id, d) {
   else { p.areaValue = null; p.areaUnit = 'м²'; }
   p.roomsNum = num(d.rooms);
   p.date = toDate(d.addedAt);
-  p.features = Array.isArray(d.features) ? d.features : [];
+  p.features = Array.isArray(d.features) ? d.features.map((f) => (f === 'Інтернет' ? 'Wi-Fi' : f)) : [];
   p.title = d.title || 'Об’єкт без назви';
   p.location = d.location || '';
   p.purpose = fixPurpose(d.purpose);
@@ -313,7 +313,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261136').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261137').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
