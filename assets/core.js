@@ -114,6 +114,7 @@ export const I = {
 /* База — Supabase: таблиця grandlife_properties (id, data jsonb, created_at), фото — бакет grandlife-photos. Схема: supabase/schema.sql */
 const TABLE = 'grandlife_properties';
 const BUCKET = 'grandlife-photos';
+const LEADS = 'grandlife_leads';
 let supaP = null;
 export function supa() {
   if (!supaP) supaP = (async () => {
@@ -194,6 +195,24 @@ export const store = {
     if (files.length) await sb.storage.from(BUCKET).remove(files.map((f) => `${id}/${f.name}`));
   },
   resetDemo() { localStorage.removeItem(DEMO_KEY); },
+  /* Заявки з реклами (вікно і банер). Відвідувач може лише додати заявку; читати й змінювати — тільки адмін. */
+  async lead(d) {
+    const row = { kind: d.kind === 'Оренда' ? 'Оренда' : 'Продаж', name: String(d.name || '').slice(0, 80), phone: String(d.phone || '').slice(0, 30), page: String(d.page || '').slice(0, 60) };
+    if (!S.supabase) { const l = JSON.parse(localStorage.getItem(DEMO_KEY + '_leads') || '[]'); l.unshift({ ...row, id: Date.now(), created_at: new Date().toISOString(), done: false }); localStorage.setItem(DEMO_KEY + '_leads', JSON.stringify(l)); return; }
+    check(await (await supa()).from(LEADS).insert(row));
+  },
+  async leads() {
+    if (!S.supabase) return JSON.parse(localStorage.getItem(DEMO_KEY + '_leads') || '[]');
+    return check(await (await supa()).from(LEADS).select('*').order('created_at', { ascending: false }).limit(500));
+  },
+  async leadUpdate(id, patch) {
+    if (!S.supabase) { const l = await store.leads(); const r = l.find((x) => x.id === id); if (r) Object.assign(r, patch); localStorage.setItem(DEMO_KEY + '_leads', JSON.stringify(l)); return; }
+    check(await (await supa()).from(LEADS).update(patch).eq('id', id));
+  },
+  async leadRemove(id) {
+    if (!S.supabase) { localStorage.setItem(DEMO_KEY + '_leads', JSON.stringify((await store.leads()).filter((x) => x.id !== id))); return; }
+    check(await (await supa()).from(LEADS).delete().eq('id', id));
+  },
 };
 
 /* ── card ── */
@@ -280,6 +299,9 @@ export function layout({ page = '', overDark = false } = {}) {
       if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
     });
   });
+
+  // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
+  if (S.promo !== false) import('./promo.js?v=20261126').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;

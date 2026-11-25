@@ -407,3 +407,86 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .hero-stats b { font-size: 34px; }
   .qsearch { margin-top: 24px; }
 }
+
+/* ── Реклама для власників: вікно і банер (assets/promo.js) ── */
+.promo { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(8, 18, 42, .62); backdrop-filter: blur(6px); opacity: 0; transition: opacity .3s var(--ease); }
+.promo.on { opacity: 1; }
+.promo[hidden] { display: none; }
+.promo-card { position: relative; display: grid; grid-template-columns: 0.9fr 1.1fr; width: min(920px, 100%); max-height: calc(100dvh - 32px); overflow: auto; background: var(--surface); border-radius: calc(var(--card-radius) + 6px); box-shadow: 0 40px 90px -30px rgba(0, 0, 0, .6); transform: translateY(18px) scale(.98); transition: transform .45s var(--ease); }
+.promo.on .promo-card { transform: none; }
+.promo-x { position: absolute; top: 14px; right: 14px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .92); color: var(--heading); display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .12); }
+.promo-x svg { width: 18px; height: 18px; }
+.promo-side { position: relative; min-height: 100%; background: var(--dark); }
+.promo-side img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .85; }
+.promo-side::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14, 30, 63, 0) 40%, rgba(14, 30, 63, .85)); }
+.promo-badge { position: absolute; left: 24px; bottom: 24px; z-index: 1; color: #fff; }
+.promo-badge b { display: block; font-family: var(--display); font-size: 40px; font-weight: 500; line-height: 1; color: var(--hero-em); }
+.promo-badge span { font-size: 13px; color: rgba(255, 255, 255, .8); }
+.promo-body { padding: 44px 40px 36px; }
+.promo-body .h2 { font-size: clamp(28px, 3.2vw, 38px); line-height: 1.12; margin-top: 12px; }
+.promo-lead { color: var(--muted); font-size: 15px; line-height: 1.6; margin: 14px 0 22px; }
+.promo-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.promo-choice button { display: flex; gap: 10px; align-items: flex-start; text-align: left; padding: 14px; border-radius: 14px; border: 1.5px solid var(--line-strong); background: var(--bg); color: var(--ink); cursor: pointer; font: inherit; transition: border-color .2s, background .2s, box-shadow .2s; }
+.promo-choice button svg { width: 26px; height: 26px; flex: none; color: var(--accent-ink); }
+.promo-choice b { display: block; font-size: 14.5px; color: var(--heading); }
+.promo-choice small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.promo-choice button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent-soft); }
+.promo-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.promo-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.promo-err { min-height: 0; margin: 8px 0 0; font-size: 13px; color: #B3261E; }
+.promo-err:empty { display: none; }
+.promo-alt { margin: 14px 0 0; font-size: 13.5px; color: var(--muted); text-align: center; }
+.promo-alt a { color: var(--heading); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--accent); }
+.promo-done { text-align: center; padding: 30px 0 10px; }
+.promo-done-ic { display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-ink); margin-bottom: 8px; }
+.promo-done-ic svg { width: 30px; height: 30px; }
+body.promo-open { overflow: hidden; }
+
+.promo-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; padding: 0 16px 14px; transform: translateY(120%); transition: transform .5s var(--ease); pointer-events: none; }
+.promo-bar.on { transform: none; }
+.promo-bar[hidden] { display: none; }
+.promo-bar .wrap { pointer-events: auto; display: flex; align-items: center; gap: 14px; padding: 12px 14px 12px 18px; background: var(--dark); color: #fff; border-radius: 16px; box-shadow: 0 20px 50px -18px rgba(8, 18, 42, .7); border: 1px solid rgba(226, 194, 122, .25); }
+.promo-bar-ic { display: grid; place-items: center; width: 42px; height: 42px; flex: none; border-radius: 12px; background: rgba(226, 194, 122, .16); color: var(--hero-em); }
+.promo-bar-ic svg { width: 22px; height: 22px; }
+.promo-bar p { margin: 0; flex: 1; font-size: 14px; line-height: 1.45; color: rgba(255, 255, 255, .78); }
+.promo-bar p b { color: #fff; font-weight: 600; }
+.promo-bar .btn.line { color: #fff; border-color: rgba(255, 255, 255, .3); }
+.promo-bar .btn.line svg { width: 16px; height: 16px; }
+.promo-bar-x { width: 34px; height: 34px; flex: none; border: 0; border-radius: 50%; background: transparent; color: rgba(255, 255, 255, .6); cursor: pointer; display: grid; place-items: center; }
+.promo-bar-x:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+.promo-bar-x svg { width: 16px; height: 16px; }
+body.has-promo-bar { padding-bottom: 96px; }
+
+@media (max-width: 760px) {
+  .promo { padding: 0; align-items: end; }
+  .promo-card { grid-template-columns: 1fr; border-radius: 22px 22px 0 0; max-height: 92dvh; }
+  .promo-side { min-height: 120px; height: 120px; }
+  .promo-badge { left: 18px; bottom: 14px; }
+  .promo-badge b { font-size: 28px; }
+  .promo-body { padding: 24px 18px 22px; }
+  .promo-lead { margin: 10px 0 16px; font-size: 14px; }
+  .promo-choice button { padding: 12px 10px; }
+  .promo-choice small { display: none; }
+  .promo-fields { grid-template-columns: 1fr; }
+  .promo-bar { padding: 0 10px 10px; }
+  .promo-bar .wrap { gap: 10px; padding: 10px 10px 10px 12px; }
+  .promo-bar-ic, .promo-bar p span, .promo-bar-call span { display: none; }
+  .promo-bar p { font-size: 13px; }
+  .promo-bar-call { padding: 10px; }
+  body.has-promo-bar { padding-bottom: 80px; }
+}
+.promo-bar .pb-m { display: none; }
+@media (max-width: 760px) {
+  .promo-body .kicker { display: none; }
+  .promo-body .h2 { margin-top: 0; font-size: 26px; }
+  .promo-side { min-height: 96px; height: 96px; }
+  .promo-badge b { font-size: 24px; }
+  .promo-choice { margin-bottom: 10px; }
+  .promo-choice button svg { width: 22px; height: 22px; }
+  .promo-bar .wrap { gap: 8px; padding: 8px 6px 8px 14px; }
+  .promo-bar p b { font-size: 13px; }
+  .promo-bar .btn.sm { padding: 10px 14px; }
+  .promo-bar .pb-d { display: none; }
+  .promo-bar .pb-m { display: inline; }
+  .promo-bar-x { width: 28px; height: 28px; }
+}

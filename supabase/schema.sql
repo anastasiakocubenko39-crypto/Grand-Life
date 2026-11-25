@@ -54,3 +54,27 @@ create policy "grandlife photos read" on storage.objects for select using (bucke
 create policy "grandlife photos insert" on storage.objects for insert to authenticated with check (bucket_id = 'grandlife-photos' and public.grandlife_is_admin());
 create policy "grandlife photos update" on storage.objects for update to authenticated using (bucket_id = 'grandlife-photos' and public.grandlife_is_admin());
 create policy "grandlife photos delete" on storage.objects for delete to authenticated using (bucket_id = 'grandlife-photos' and public.grandlife_is_admin());
+
+-- Заявки з реклами на сайті («Бажаєте продати чи здати в оренду?»).
+-- Відвідувач може лише ДОДАТИ заявку; бачити, позначати й видаляти — тільки адмін.
+create table if not exists public.grandlife_leads (
+  id bigint generated always as identity primary key,
+  kind text not null default 'Продаж',
+  name text not null default '',
+  phone text not null,
+  page text not null default '',
+  done boolean not null default false,
+  created_at timestamptz not null default now()
+);
+alter table public.grandlife_leads enable row level security;
+drop policy if exists "grandlife leads insert" on public.grandlife_leads;
+drop policy if exists "grandlife leads admin read" on public.grandlife_leads;
+drop policy if exists "grandlife leads admin update" on public.grandlife_leads;
+drop policy if exists "grandlife leads admin delete" on public.grandlife_leads;
+create policy "grandlife leads insert" on public.grandlife_leads for insert to anon, authenticated
+  with check (kind in ('Продаж', 'Оренда') and char_length(phone) between 5 and 30 and char_length(name) <= 80 and char_length(page) <= 60 and done = false);
+create policy "grandlife leads admin read" on public.grandlife_leads for select to authenticated using (public.grandlife_is_admin());
+create policy "grandlife leads admin update" on public.grandlife_leads for update to authenticated using (public.grandlife_is_admin()) with check (public.grandlife_is_admin());
+create policy "grandlife leads admin delete" on public.grandlife_leads for delete to authenticated using (public.grandlife_is_admin());
+grant insert on public.grandlife_leads to anon, authenticated;
+grant select, update, delete on public.grandlife_leads to authenticated;
