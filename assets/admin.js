@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, fixPurpose, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261137';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, fixPurpose, SUBTYPES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261138';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -229,7 +229,7 @@ function openEditor(id) {
     areaValue: p?.areaValue ?? '', areaUnit: p?.areaUnit || 'м²', livingArea: d.livingArea || '', kitchenArea: d.kitchenArea || '', landArea: d.landArea || '',
     livingUnit: d.livingUnit || 'м²', kitchenUnit: d.kitchenUnit || 'м²', landUnit: d.landUnit || 'сот',
     rooms: d.rooms && d.rooms !== '—' ? d.rooms : '', bathrooms: d.bathrooms || '', floor: d.floor || '', floors: d.floors || '', year: d.year || '',
-    condition: d.condition || '', purpose: fixPurpose(d.purpose), cadastre: d.cadastre || '',
+    condition: d.condition || '', subtype: d.subtype || '', purpose: fixPurpose(d.purpose), cadastre: d.cadastre || '',
     rentTerm: d.rentTerm || '', deposit: d.deposit || '', available: d.available || '',
     description: d.description || '', infrastructure: d.infrastructure || '', videoUrl: d.videoUrl || '', code: d.code || '',
     features: [...(p?.features || [])], featured: !!d.featured, sold: !!d.sold,
@@ -271,6 +271,7 @@ function openEditor(id) {
 
         <section class="card only-build"><h2><i>4</i>Характеристики</h2><p class="hint">Заповнюйте все, що знаєте, — порожні поля на сайті не показуються.</p>
           <div class="fgrid three">
+            ${Object.entries(SUBTYPES).map(([ty, { label, list }]) => `<label class="f only-sub" data-sub="${ty}"><span>${label}</span><select class="field" data-sub-for="${ty}">${opt(list.includes(form.subtype) || !form.subtype || form.type !== ty ? list : [...list, form.subtype], form.type === ty ? form.subtype : '')}</select></label>`).join('')}
             ${inp('rooms', 'Кімнат', '3')}${inp('bathrooms', 'Санвузлів', '2')}
             ${inp('floor', 'Поверх', '7')}${inp('floors', 'Поверхів у будинку', '12')}${inp('year', 'Рік будівництва', '2021')}
             <label class="f"><span>Стан</span><select class="field" data-k="condition">${opt(CONDITIONS, form.condition)}</select></label>
@@ -322,8 +323,9 @@ function openEditor(id) {
     form[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; dirty = true; refresh();
   });
   $('#main').addEventListener('change', (e) => { const k = e.target.dataset.k; if (k) { form[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; dirty = true; refresh(); } });
+  $$('[data-sub-for]').forEach((s) => (s.onchange = () => { form.subtype = s.value; dirty = true; refresh(); }));
   $('#deal').onclick = (e) => { const b = e.target.closest('[data-deal]'); if (!b) return; form.deal = b.dataset.deal; $$('#deal button').forEach((x) => x.setAttribute('aria-pressed', x === b)); dirty = true; refresh(); };
-  $('#types').onclick = (e) => { const b = e.target.closest('[data-t]'); if (!b) return; form.type = b.dataset.t; $$('#types button').forEach((x) => x.setAttribute('aria-pressed', x === b)); dirty = true; refresh(); };
+  $('#types').onclick = (e) => { const b = e.target.closest('[data-t]'); if (!b) return; form.type = b.dataset.t; $$('#types button').forEach((x) => x.setAttribute('aria-pressed', x === b)); if (!SUBTYPES[form.type]?.list.includes(form.subtype)) { form.subtype = ''; $$('[data-sub-for]').forEach((s) => (s.value = '')); } dirty = true; refresh(); };
   $$('#finChips .chip').forEach((c) => (c.onclick = () => { const n = c.dataset.fin; form.finance = form.finance.includes(n) ? form.finance.filter((x) => x !== n) : [...form.finance, n]; c.setAttribute('aria-pressed', form.finance.includes(n)); dirty = true; refresh(); }));
   $$('.feat-groups .chip').forEach((c) => (c.onclick = () => { const f = c.dataset.f; form.features = form.features.includes(f) ? form.features.filter((x) => x !== f) : [...form.features, f]; c.setAttribute('aria-pressed', form.features.includes(f)); dirty = true; refresh(); }));
   $('#tpl').onclick = () => {
@@ -354,6 +356,7 @@ function refresh() {
   const t = form.type;
   $$('.only-build').forEach((e) => (e.hidden = t === 'Ділянка'));
   $$('.only-house').forEach((e) => (e.hidden = t !== 'Будинок'));
+  $$('.only-sub').forEach((e) => (e.hidden = e.dataset.sub !== t));
   $$('.only-land').forEach((e) => (e.hidden = t !== 'Ділянка'));
   const rent = form.deal === 'Оренда' || t === 'Оренда';
   $$('.only-rent').forEach((e) => (e.hidden = !rent));
@@ -381,7 +384,7 @@ function data() {
     features: f.features, featured: !!f.featured, sold: !!f.sold,
     finance: (S.financePrograms || []).map(([n]) => n).filter((n) => f.finance.includes(n)),
   };
-  if (f.type !== 'Ділянка') Object.assign(out, { livingArea: f.livingArea, livingUnit: f.livingUnit, kitchenArea: f.kitchenArea, kitchenUnit: f.kitchenUnit, landArea: f.landArea, landUnit: f.landUnit, rooms: f.rooms || '—', bathrooms: f.bathrooms, floor: f.floor, floors: f.floors, year: f.year, condition: f.condition });
+  if (f.type !== 'Ділянка') Object.assign(out, { livingArea: f.livingArea, livingUnit: f.livingUnit, kitchenArea: f.kitchenArea, kitchenUnit: f.kitchenUnit, landArea: f.landArea, landUnit: f.landUnit, rooms: f.rooms || '—', bathrooms: f.bathrooms, floor: f.floor, floors: f.floors, year: f.year, condition: f.condition, subtype: SUBTYPES[f.type] ? f.subtype : '' });
   else Object.assign(out, { rooms: '—', purpose: f.purpose, cadastre: f.cadastre });
   out.deal = f.type === 'Оренда' ? 'Оренда' : f.deal;
   if (out.deal === 'Оренда') Object.assign(out, { rentTerm: f.rentTerm, deposit: f.deposit, available: f.available });
