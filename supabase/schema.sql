@@ -85,3 +85,9 @@ drop policy if exists "grandlife leads insert" on public.grandlife_leads;
 create policy "grandlife leads insert" on public.grandlife_leads for insert to anon, authenticated
   with check (kind in ('Продаж', 'Оренда', 'Шукає оренду') and object in ('', 'Квартира', 'Будинок', 'Ділянка', 'Комерція')
     and char_length(phone) between 5 and 30 and char_length(name) <= 80 and char_length(page) <= 60 and done = false);
+
+-- Оновлення: друга кнопка вікна — «Купити або орендувати» (тип заявки «Купівля»).
+drop policy if exists "grandlife leads insert" on public.grandlife_leads;
+create policy "grandlife leads insert" on public.grandlife_leads for insert to anon, authenticated
+  with check (kind in ('Продаж', 'Оренда', 'Купівля', 'Шукає оренду') and object in ('', 'Квартира', 'Будинок', 'Ділянка', 'Комерція')
+    and char_length(phone) between 5 and 30 and char_length(name) <= 80 and char_length(page) <= 60 and done = false);

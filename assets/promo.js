@@ -1,7 +1,7 @@
 /* Реклама: вікно при відкритті сайту (крок 1 — «Ви власник чи шукаєте оренду?», крок 2 — форма для власника
    або для орендаря) і банер унизу, що їде за сторінкою.
    Заявки зберігаються в Supabase (таблиця grandlife_leads) і видно в адмінці → «Заявки». */
-import { S, I, esc, store, telHref, $ } from './core.js?v=20261128';
+import { S, I, esc, store, telHref, $ } from './core.js?v=20261129';
 
 const SENT = 'gl_lead_sent2';   // коли відвідувач залишив заявку (вікно 3 дні не показуємо)
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } } };
@@ -18,7 +18,6 @@ const ICO = {
 };
 const phone = (S.phones || [])[0];
 const OBJECTS = ['Квартира', 'Будинок', 'Ділянка', 'Комерція'];
-const RENT_OBJECTS = ['Квартира', 'Будинок', 'Комерція'];
 
 /* Тексти обох гілок. Змінюйте тут. */
 const FLOW = {
@@ -26,17 +25,19 @@ const FLOW = {
     img: S.aboutImage || S.heroImage, badge: ['3 тижні', 'середній строк продажу'],
     kicker: 'Власникам нерухомості',
     title: 'Бажаєте <em>продати</em> чи <em>здати в оренду?</em>',
+    choices: [['Продаж', 'Продати', 'оцінка, реклама, покупець', 'sell'], ['Оренда', 'Здати в оренду', 'перевірені орендарі', 'rent']],
     lead: 'Безкоштовно оцінимо ваш об’єкт і знайдемо покупця або орендаря. Фото, реклама і юридичний супровід — беремо на себе.',
     objects: OBJECTS, objectsLabel: 'Що у вас є',
     submit: 'Отримати безкоштовну оцінку',
     done: 'Менеджер зателефонує вам найближчим часом, щоб домовитись про безкоштовну оцінку.',
   },
-  tenant: {
+  tenant: { // покупці та орендарі (?who=tenant або ?who=buyer)
     img: S.about?.image || S.aboutImage || S.heroImage, badge: ['Київ', 'та Київська область'],
-    kicker: 'Для орендарів',
-    title: 'Шукаєте нерухомість <em>в оренду?</em>',
-    lead: 'Підберемо квартиру, будинок або комерційне приміщення під ваш бюджет і район. Тільки перевірені власники, покази у зручний час і прозорий договір оренди.',
-    objects: RENT_OBJECTS, objectsLabel: 'Що шукаєте',
+    kicker: 'Для покупців і орендарів',
+    title: 'Бажаєте <em>купити</em> чи <em>орендувати?</em>',
+    lead: 'Підберемо квартиру, будинок, ділянку або комерцію під ваш бюджет і район. Перевіряємо документи й власників, організовуємо покази і супроводжуємо угоду.',
+    choices: [['Купівля', 'Купити', 'перевірені об’єкти й документи', 'sell'], ['Шукає оренду', 'Орендувати', 'перевірені власники', 'rent']],
+    objects: OBJECTS, objectsLabel: 'Що шукаєте',
     submit: 'Підібрати варіанти',
     done: 'Менеджер зателефонує вам найближчим часом, уточнить побажання і надішле підходящі варіанти.',
   },
@@ -50,11 +51,11 @@ export function mountFlow(body, { side = () => {}, close = () => {}, source = ''
     side(S.heroImage, ['Гранд Лайф', 'агентство нерухомості з 2017 року']);
     body.innerHTML = `
       <span class="kicker">Безкоштовна консультація</span>
-      <h2 class="h2" id="promoTitle">Ви <em>власник</em> чи шукаєте <em>оренду?</em></h2>
+      <h2 class="h2" id="promoTitle">Що саме вас <em>цікавить?</em></h2>
       <p class="promo-lead">Оберіть, і ми підкажемо, як допомогти саме вам.</p>
       <div class="promo-who">
-        <button type="button" data-who="owner">${ICO.owner}<span><b>Я власник</b><small>хочу продати або здати в оренду квартиру, будинок, ділянку чи комерцію</small></span>${ICO.arrow}</button>
-        <button type="button" data-who="tenant">${ICO.tenant}<span><b>Шукаю оренду</b><small>хочу орендувати житло або комерційне приміщення</small></span>${ICO.arrow}</button>
+        <button type="button" data-who="owner">${ICO.owner}<span><b>Продати або здати в оренду</b><small>квартиру, будинок, ділянку чи комерцію</small></span>${ICO.arrow}</button>
+        <button type="button" data-who="tenant">${ICO.tenant}<span><b>Купити або орендувати</b><small>квартиру, будинок, ділянку чи комерцію</small></span>${ICO.arrow}</button>
       </div>
       ${phone ? `<p class="promo-alt">або зателефонуйте: <a href="${telHref(phone)}">${esc(phone)}</a></p>` : ''}`;
     body.querySelector('.promo-who').onclick = (e) => { const b = e.target.closest('[data-who]'); if (b) stepForm(b.dataset.who); };
@@ -63,7 +64,7 @@ export function mountFlow(body, { side = () => {}, close = () => {}, source = ''
   /* Крок 2: форма для власника або орендаря */
   const stepForm = (who) => {
     const F = FLOW[who];
-    let kind = who === 'owner' ? 'Продаж' : 'Шукає оренду';
+    let kind = F.choices[0][0];
     let object = '';
     side(F.img, F.badge);
     body.innerHTML = `
@@ -72,10 +73,9 @@ export function mountFlow(body, { side = () => {}, close = () => {}, source = ''
       <h2 class="h2" id="promoTitle">${F.title}</h2>
       <p class="promo-lead">${F.lead}</p>
       <form class="promo-form" novalidate>
-        ${who === 'owner' ? `<div class="promo-choice" data-g="kind" role="radiogroup" aria-label="Що бажаєте">
-          <button type="button" data-v="Продаж" aria-pressed="true">${ICO.sell}<span><b>Продати</b><small>оцінка, реклама, покупець</small></span></button>
-          <button type="button" data-v="Оренда" aria-pressed="false">${ICO.rent}<span><b>Здати в оренду</b><small>перевірені орендарі</small></span></button>
-        </div>` : ''}
+        <div class="promo-choice" data-g="kind" role="radiogroup" aria-label="Що бажаєте">
+          ${F.choices.map(([v, b, s, ic], i) => `<button type="button" data-v="${v}" aria-pressed="${i === 0}">${ICO[ic]}<span><b>${b}</b><small>${s}</small></span></button>`).join('')}
+        </div>
         <div class="promo-objs-l">${F.objectsLabel}</div>
         <div class="promo-objs" data-g="object" role="radiogroup" aria-label="${F.objectsLabel}">
           ${F.objects.map((o) => `<button type="button" data-v="${o}" aria-pressed="false">${o}</button>`).join('')}
@@ -118,7 +118,8 @@ export function mountFlow(body, { side = () => {}, close = () => {}, source = ''
     if (!matchMedia('(max-width: 760px)').matches) setTimeout(() => form.phone.focus({ preventScroll: true }), 50);
   };
 
-  const begin = FLOW[start] ? () => stepForm(start) : stepWho;
+  const st = start === 'buyer' ? 'tenant' : start;
+  const begin = FLOW[st] ? () => stepForm(st) : stepWho;
   begin();
 }
 
@@ -138,7 +139,7 @@ export function promo() {
   <div class="promo-bar" id="promoBar" hidden>
     <div class="wrap">
       <span class="promo-bar-ic">${ICO.sell}</span>
-      <p><b>Продаєте, здаєте чи шукаєте оренду?</b><span> Безкоштовна консультація — підберемо рішення під вас.</span></p>
+      <p><b>Продати, купити чи орендувати?</b><span> Безкоштовна консультація — підберемо рішення під вас.</span></p>
       ${phone ? `<a class="btn line sm promo-bar-call" href="${telHref(phone)}" aria-label="Зателефонувати">${I.phone}<span>${esc(phone)}</span></a>` : ''}
       <button class="btn sm" type="button" id="promoOpen"><span class="pb-d">Залишити заявку</span><span class="pb-m">Заявка</span></button>
       <button class="promo-bar-x" type="button" aria-label="Сховати банер">${ICO.close}</button>
