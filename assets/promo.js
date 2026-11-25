@@ -1,7 +1,7 @@
 /* Реклама: вікно при відкритті сайту (крок 1 — «Ви власник чи шукаєте оренду?», крок 2 — форма для власника
    або для орендаря) і банер унизу, що їде за сторінкою.
    Заявки зберігаються в Supabase (таблиця grandlife_leads) і видно в адмінці → «Заявки». */
-import { S, I, esc, store, telHref, $ } from './core.js?v=20261129';
+import { S, I, esc, store, telHref, $ } from './core.js?v=20261130';
 
 const SENT = 'gl_lead_sent2';   // коли відвідувач залишив заявку (вікно 3 дні не показуємо)
 const ls = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } } };
@@ -18,6 +18,7 @@ const ICO = {
 };
 const phone = (S.phones || [])[0];
 const OBJECTS = ['Квартира', 'Будинок', 'Ділянка', 'Комерція'];
+const OBJ_LABEL = { 'Комерція': 'Комерційна нерухомість' }; // як показувати на кнопках
 
 /* Тексти обох гілок. Змінюйте тут. */
 const FLOW = {
@@ -35,7 +36,7 @@ const FLOW = {
     img: S.about?.image || S.aboutImage || S.heroImage, badge: ['Київ', 'та Київська область'],
     kicker: 'Для покупців і орендарів',
     title: 'Бажаєте <em>купити</em> чи <em>орендувати?</em>',
-    lead: 'Підберемо квартиру, будинок, ділянку або комерцію під ваш бюджет і район. Перевіряємо документи й власників, організовуємо покази і супроводжуємо угоду.',
+    lead: 'Підберемо квартиру, будинок, ділянку або комерційну нерухомість під ваш бюджет і район. Перевіряємо документи й власників, організовуємо покази і супроводжуємо угоду.',
     choices: [['Купівля', 'Купити', 'перевірені об’єкти й документи', 'sell'], ['Шукає оренду', 'Орендувати', 'перевірені власники', 'rent']],
     objects: OBJECTS, objectsLabel: 'Що шукаєте',
     submit: 'Підібрати варіанти',
@@ -54,8 +55,8 @@ export function mountFlow(body, { side = () => {}, close = () => {}, source = ''
       <h2 class="h2" id="promoTitle">Що саме вас <em>цікавить?</em></h2>
       <p class="promo-lead">Оберіть, і ми підкажемо, як допомогти саме вам.</p>
       <div class="promo-who">
-        <button type="button" data-who="owner">${ICO.owner}<span><b>Продати або здати в оренду</b><small>квартиру, будинок, ділянку чи комерцію</small></span>${ICO.arrow}</button>
-        <button type="button" data-who="tenant">${ICO.tenant}<span><b>Купити або орендувати</b><small>квартиру, будинок, ділянку чи комерцію</small></span>${ICO.arrow}</button>
+        <button type="button" data-who="owner">${ICO.owner}<span><b>Продати або здати в оренду</b><small>квартиру, будинок, ділянку чи комерційну нерухомість</small></span>${ICO.arrow}</button>
+        <button type="button" data-who="tenant">${ICO.tenant}<span><b>Купити або орендувати</b><small>квартиру, будинок, ділянку чи комерційну нерухомість</small></span>${ICO.arrow}</button>
       </div>
       ${phone ? `<p class="promo-alt">або зателефонуйте: <a href="${telHref(phone)}">${esc(phone)}</a></p>` : ''}`;
     body.querySelector('.promo-who').onclick = (e) => { const b = e.target.closest('[data-who]'); if (b) stepForm(b.dataset.who); };
@@ -78,7 +79,7 @@ export function mountFlow(body, { side = () => {}, close = () => {}, source = ''
         </div>
         <div class="promo-objs-l">${F.objectsLabel}</div>
         <div class="promo-objs" data-g="object" role="radiogroup" aria-label="${F.objectsLabel}">
-          ${F.objects.map((o) => `<button type="button" data-v="${o}" aria-pressed="false">${o}</button>`).join('')}
+          ${F.objects.map((o) => `<button type="button" data-v="${o}" aria-pressed="false">${OBJ_LABEL[o] || o}</button>`).join('')}
         </div>
         <div class="promo-fields">
           <input class="field" name="name" autocomplete="name" placeholder="Ваше ім’я" maxlength="80">
