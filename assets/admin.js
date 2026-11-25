@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261125';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261126';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -9,6 +9,7 @@ const ICON = {
   edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
   star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>',
+  inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 13h4l1.5 3h5L16 13h4"/><path d="M5.5 5h13L21 13v6H3v-6z"/></svg>',
   eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
 };
 const MAX_DOC = 950000; // Firestore document limit is ~1 MB
@@ -20,9 +21,10 @@ let filt = { q: '', type: '', status: '' };
 ['#lLogo', '#sLogo', '#mLogo'].forEach((s, i) => ($(s).src = i ? S.logoLight : S.logo));
 $('[data-view="list"]').innerHTML = ICON.list + 'Усі об’єкти';
 $('[data-view="new"]').innerHTML = ICON.plus + 'Додати об’єкт';
+$('[data-view="leads"]').innerHTML = ICON.inbox + 'Заявки <span class="nav-count" id="leadCount" hidden></span>';
 $('#toSite').innerHTML = ICON.site + 'Відкрити сайт';
 $('#logout').innerHTML = ICON.out + 'Вийти';
-$$('.side-nav [data-view]').forEach((b) => (b.onclick = () => { $('#sideNav').classList.remove('open'); b.dataset.view === 'new' ? openEditor(null) : showList(); }));
+$$('.side-nav [data-view]').forEach((b) => (b.onclick = () => { $('#sideNav').classList.remove('open'); b.dataset.view === 'new' ? openEditor(null) : b.dataset.view === 'leads' ? showLeads() : showList(); }));
 $('#mMenu').onclick = () => $('#sideNav').classList.toggle('open');
 
 /* ── auth ── */
@@ -69,7 +71,43 @@ async function start(who) {
     $('#main').innerHTML = `<div class="empty"><b>Не вдалося завантажити об’єкти</b>${esc(e.message)}<br><br>Перевірте інтернет і оновіть сторінку. Якщо помилка про таблицю grandlife_properties — у Supabase не виконано файл supabase/schema.sql.</div>`;
   }
 }
-async function reload() { RAW = await store.raw(); }
+async function reload() { RAW = await store.raw(); countLeads(); }
+
+/* ── заявки з реклами ── */
+let LEADS = [];
+async function countLeads() {
+  try { LEADS = await store.leads(); } catch (e) { console.error(e); LEADS = []; }
+  const n = LEADS.filter((l) => !l.done).length;
+  const c = $('#leadCount'); if (c) { c.hidden = !n; c.textContent = n; }
+}
+async function showLeads() {
+  view = 'leads'; navCur('leads');
+  $('#main').innerHTML = '<div class="adm-top"><h1>Заявки</h1></div><div class="rows" id="leadRows"><div class="empty"><b>Завантажуємо…</b></div></div>';
+  try { await countLeads(); } catch {}
+  const draw = () => {
+    $('#leadRows').innerHTML = LEADS.length ? LEADS.map((l) => `
+      <div class="row lead${l.done ? ' done' : ''}" data-id="${esc(l.id)}">
+        <div class="th lead-ic">${l.kind === 'Оренда' ? 'О' : 'П'}</div>
+        <div><h3>${esc(l.name || 'Без імені')} · <a href="tel:${esc(String(l.phone).replace(/[^\d+]/g, ''))}">${esc(l.phone)}</a></h3>
+          <div class="meta"><span class="pill">${l.kind === 'Оренда' ? 'Здати в оренду' : 'Продати'}</span>${l.done ? '<span class="pill">Опрацьовано</span>' : '<span class="pill star">Нова</span>'}<span>${new Date(l.created_at).toLocaleString('uk-UA', { dateStyle: 'medium', timeStyle: 'short' })}</span>${l.page ? `<span>зі сторінки ${esc(l.page)}</span>` : ''}</div></div>
+        <div class="acts">
+          <a class="ibtn" href="tel:${esc(String(l.phone).replace(/[^\d+]/g, ''))}">Зателефонувати</a>
+          <button class="ibtn${l.done ? '' : ' on'}" data-a="done">${l.done ? 'Повернути в нові' : 'Опрацьовано'}</button>
+          <button class="ibtn danger" data-a="del" title="Видалити">${ICON.trash}</button>
+        </div>
+      </div>`).join('') : '<div class="empty"><b>Заявок поки немає</b>Вони з’являться тут, коли відвідувачі заповнять форму в рекламному вікні або банері на сайті.</div>';
+  };
+  draw();
+  $('#leadRows').onclick = async (e) => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    const id = b.closest('.row').dataset.id; const l = LEADS.find((x) => String(x.id) === id); if (!l) return;
+    try {
+      if (b.dataset.a === 'done') await store.leadUpdate(l.id, { done: !l.done });
+      if (b.dataset.a === 'del') { if (!confirm('Видалити заявку?')) return; await store.leadRemove(l.id); }
+      await countLeads(); draw();
+    } catch (err) { console.error(err); alert('Не вдалося зберегти: ' + err.message); }
+  };
+}
 
 /* ── одноразове перенесення з Firebase (Firestore REST, тільки читання) ── */
 function fsValue(v) {
