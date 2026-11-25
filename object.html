@@ -8,9 +8,9 @@
 <link rel="icon" href="assets/brand/mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="theme.css?v=20261132">
-<link rel="stylesheet" href="assets/app.css?v=20261132">
-<script src="config.js?v=20261132"></script>
+<link rel="stylesheet" href="theme.css?v=20261133">
+<link rel="stylesheet" href="assets/app.css?v=20261133">
+<script src="config.js?v=20261133"></script>
 </head>
 <body class="has-bar">
 <main class="obj"><div class="wrap" id="root"><div class="skeleton" style="min-height:520px;margin-top:30px"></div></div></main>
@@ -20,7 +20,7 @@
   <div class="lb-thumbs" id="lbThumbs"></div>
 </div>
 <script type="module">
-import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261132';
+import { S, TYPE, I, esc, fmt, store, cardHTML, priceHTML, priceText, areaText, shortPurpose, layout, reveal, telHref, toast, $, $$ } from './assets/core.js?v=20261133';
 layout({ page: 'catalog' });
 $('#lbClose').innerHTML = I.x; $('#lbPrev').innerHTML = I.left; $('#lbNext').innerHTML = I.right;
 const id = new URLSearchParams(location.search).get('id');
@@ -110,13 +110,16 @@ function render() {
         </div>
         ${p.priceValue && p.type !== 'Оренда' && !p.sold && progs.length ? `<div class="side-card rv calc" id="calc">
           <b style="font-size:17px;color:var(--heading)">Розрахунок іпотеки</b>
-          <div class="calc-progs" id="cProgs">${progs.map(([n, , , , note], i) => `<button type="button" data-i="${i}" aria-pressed="${i === 0}" title="${esc(note || '')}">${esc(n)}</button>`).join('')}</div>
+          <div class="calc-progs" id="cProgs">${progs.map(([n], i) => `<button type="button" data-i="${i}" aria-pressed="${i === 0}">${esc(n)}</button>`).join('')}</div>
+          <label id="cCatL">Хто ви<select class="field" id="cCat"></select></label>
+          <label class="calc-check" id="cYoungL"><input type="checkbox" id="cYoung"> Мені до 25 років включно</label>
+          <label>Перший внесок: <span id="cDownT"></span><input type="range" id="cDown" step="5"></label>
+          <label>Строк: <span id="cYearsT"></span><input type="range" id="cYears" step="1"></label>
+          <label id="cRateL">Ставка: <span id="cRateT"></span><input type="range" id="cRate" step="0.5"></label>
+          <div class="calc-rate" id="cRateFix"></div>
+          <div><span style="font-size:13px;color:var(--muted)" id="cPayL">Щомісячний платіж</span><output id="cOut"></output><div class="calc-after" id="cAfter"></div></div>
+          <dl class="calc-sum" id="cSum"></dl>
           <span class="calc-note" id="cNote"></span>
-          <label>Перший внесок: <span id="cDownT"></span><input type="range" id="cDown" min="10" max="70" value="${progs[0][2] || 30}" step="5"></label>
-          <label>Строк: <span id="cYearsT"></span><input type="range" id="cYears" min="1" max="25" value="${progs[0][3] || 10}"></label>
-          <label>Ставка: <span id="cRateT"></span><input type="range" id="cRate" min="1" max="25" value="${progs[0][1] || S.mortgageRate || 7}" step="0.5"></label>
-          <div><span style="font-size:13px;color:var(--muted)">Щомісячний платіж</span><output id="cOut"></output></div>
-          <span style="font-size:12px;color:var(--muted)">Орієнтовно. Точні умови — у банку, допоможемо з оформленням.</span>
         </div>` : ''}
       </aside>
     </div>
@@ -129,22 +132,60 @@ function render() {
   $('#share').onclick = async () => { if (navigator.share) { try { await navigator.share({ title: p.title, url: location.href }); } catch {} } else { try { await navigator.clipboard.writeText(location.href); toast('Посилання скопійовано'); } catch {} } };
 
   if ($('#calc')) {
+    /* Калькулятор за правилами з config.js → financeRules (єОселя: 3% / 7% перші 10 років, далі +3 п.п.;
+       внесок від 20%, до 25 років — від 10%; строк 5–20 років. Банк: ринкова ставка). Кредит рахуємо в гривнях. */
+    const R = S.financeRules || {};
+    const priceUAH = p.currency === '₴' ? p.priceValue : (p.uah || p.priceValue * 41.5);
+    const uahPerUsd = p.usd ? priceUAH / p.usd : 41.5;
+    const annuity = (sum, rMonth, n) => (n <= 0 ? 0 : rMonth ? sum * rMonth / (1 - Math.pow(1 + rMonth, -n)) : sum / n);
+    const hr = (v) => `${fmt(v)} ₴`;
+    let prog;
+    const setRange = (el, min, max, val) => { el.min = min; el.max = max; el.value = Math.min(max, Math.max(min, +val)); };
     const upd = () => {
-      const down = +$('#cDown').value, years = +$('#cYears').value, rate = +$('#cRate').value / 100 / 12, n = years * 12;
-      const loan = p.priceValue * (1 - down / 100);
-      const pay = rate ? loan * rate / (1 - Math.pow(1 + rate, -n)) : loan / n;
-      $('#cDownT').textContent = `${down}% · ${p.currency}${fmt(p.priceValue * down / 100)}`;
-      $('#cYearsT').textContent = `${years} р.`; $('#cRateT').textContent = `${$('#cRate').value}% річних`;
-      $('#cOut').innerHTML = `${p.currency === '₴' ? '' : p.currency}${fmt(pay)}${p.currency === '₴' ? ' ₴' : ''}${p.currency !== '₴' && p.uah ? `<small> ≈ ${fmt(pay * p.uah / p.priceValue)} ₴</small>` : ''}`;
+      const isE = prog.kind === 'eoselia', rule = isE ? R.eoselia : R.bank;
+      const young = isE && $('#cYoung').checked;
+      const downMin = isE ? (young ? rule.downYoung : rule.downMin) : rule.downMin;
+      if (+$('#cDown').min !== downMin) setRange($('#cDown'), downMin, 70, Math.max(downMin, +$('#cDown').value));
+      const down = +$('#cDown').value, years = +$('#cYears').value, n = years * 12;
+      const rate1 = isE ? +$('#cCat').value : +$('#cRate').value;
+      const stepN = isE ? Math.min(n, rule.stepAfterYears * 12) : n;
+      const rate2 = isE ? rate1 + rule.stepUp : rate1;
+      const loan = priceUAH * (1 - down / 100);
+      const r1 = rate1 / 1200, r2 = rate2 / 1200;
+      const pay1 = annuity(loan, r1, n);
+      let pay2 = 0, total = pay1 * n;
+      if (stepN < n) { // після 10 років ставка зростає: перераховуємо платіж на залишок боргу
+        const bal = r1 ? loan * Math.pow(1 + r1, stepN) - pay1 * (Math.pow(1 + r1, stepN) - 1) / r1 : loan - pay1 * stepN;
+        pay2 = annuity(bal, r2, n - stepN); total = pay1 * stepN + pay2 * (n - stepN);
+      }
+      $('#cDownT').textContent = `${down}% · ${hr(priceUAH * down / 100)}`;
+      $('#cYearsT').textContent = `${years} р.`;
+      $('#cRateT').textContent = `${rate1}% річних`;
+      $('#cRateFix').innerHTML = isE ? `Ставка: <b>${rate1}%</b> перші ${rule.stepAfterYears} років${stepN < n ? `, далі <b>${rate2}%</b>` : ''}` : '';
+      $('#cPayL').textContent = stepN < n ? `Щомісячний платіж (1–${rule.stepAfterYears} рік)` : 'Щомісячний платіж';
+      $('#cOut').innerHTML = `${hr(pay1)}<small> ≈ $${fmt(pay1 / uahPerUsd)}</small>`;
+      $('#cAfter').textContent = stepN < n ? `з ${rule.stepAfterYears + 1}-го року: ${hr(pay2)} на місяць` : '';
+      $('#cSum').innerHTML = `<div><dt>Сума кредиту</dt><dd>${hr(loan)}</dd></div><div><dt>Переплата за весь строк</dt><dd>${hr(total - loan)}</dd></div>`;
     };
     const pick = (i) => {
-      const [, rate, down, years, note] = progs[i];
+      prog = { name: progs[i][0], ...(progs[i][1] || {}) };
       $$('#cProgs button').forEach((b) => b.setAttribute('aria-pressed', +b.dataset.i === i));
-      if (rate) $('#cRate').value = rate; if (down) $('#cDown').value = down; if (years) $('#cYears').value = years;
-      $('#cNote').textContent = note || ''; upd();
+      const isE = prog.kind === 'eoselia', rule = isE ? R.eoselia : R.bank;
+      const cats = isE ? (rule.categories || []).filter(([c]) => !prog.cats || prog.cats.includes(c)) : [];
+      $('#cCat').innerHTML = cats.map(([c, r]) => `<option value="${r}">${esc(c)} — ${r}%</option>`).join('');
+      $('#cCatL').hidden = !isE || cats.length < 2; $('#cYoungL').hidden = !isE;
+      $('#cRateL').hidden = isE; $('#cRateFix').hidden = !isE;
+      $('#cYoung').checked = false;
+      setRange($('#cDown'), rule.downMin, 70, isE ? rule.downMin : rule.downDefault);
+      setRange($('#cYears'), rule.termMin, rule.termMax, rule.termDefault);
+      if (!isE) setRange($('#cRate'), rule.rateMin, rule.rateMax, rule.rate);
+      $('#cNote').textContent = (isE ? R.eoselia.note : R.bank.note) || '';
+      upd();
     };
     $('#cProgs').onclick = (e) => { const b = e.target.closest('[data-i]'); if (b) pick(+b.dataset.i); };
-    $$('#calc input').forEach((i) => (i.oninput = upd)); pick(0);
+    $$('#calc input, #calc select').forEach((el) => (el.oninput = el.onchange = upd));
+    $('#cYoung').onchange = () => { const r = R.eoselia, y = $('#cYoung').checked; setRange($('#cDown'), y ? r.downYoung : r.downMin, 70, y ? r.downYoung : r.downMin); upd(); };
+    pick(0);
   }
 
   // lightbox
