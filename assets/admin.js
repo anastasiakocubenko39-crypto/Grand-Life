@@ -1,5 +1,5 @@
 /* Realty template — admin panel logic */
-import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261133';
+import { S, TYPES, PUBLIC_TYPES, TYPE, CONDITIONS, WALLS, HEATING, PURPOSES, FEATURES, I, esc, fmt, store, norm, cardHTML, toast, supa as getSupa, $, $$ } from './core.js?v=20261134';
 
 const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h16M6 20V9l6-5 6 5v11"/></svg>',
@@ -258,7 +258,7 @@ function openEditor(id) {
         <section class="card"><h2><i>3</i>Ціна і площа</h2><p class="hint">Ціну вказуйте числом — так працюють фільтри і сортування на сайті.</p>
           <div class="fgrid">
             <label class="f"><span>Ціна</span><div class="combo"><input class="field" data-k="priceValue" inputmode="numeric" value="${esc(form.priceValue)}" placeholder="125000"><select class="field" data-k="currency">${['$', '€', '₴'].map((c) => `<option${c === form.currency ? ' selected' : ''}>${c}</option>`).join('')}</select></div><small id="rentHint">${form.type === 'Оренда' ? 'Для оренди — ціна за місяць.' : ''}</small></label>
-            <div class="f full"><span>Програми фінансування</span><div class="chips" id="finChips">${(S.financePrograms || []).map(([n]) => `<button type="button" class="chip" data-fin="${esc(n)}" aria-pressed="${form.finance.includes(n)}">${esc(n)}</button>`).join('')}</div><small>Якщо відмітити хоч одну — на сторінці об’єкта з’явиться калькулятор іпотеки з цими програмами. Нічого не відмічено — калькулятора немає.</small></div>
+            <div class="f full"><span>Програми фінансування</span><div class="chips" id="finChips">${(S.financePrograms || []).map(([n]) => `<button type="button" class="chip" data-fin="${esc(n)}" aria-pressed="${form.finance.includes(n)}">${esc(n)}</button>`).join('')}</div><small>Відмічені програми показуються значками на картці і сторінці об’єкта. Нічого не відмічено — значків немає.</small></div>
             <label class="f"><span>Умови оплати</span><select class="field" data-k="priceNote">${opt(PAY_TERMS.includes(form.priceNote) || !form.priceNote ? PAY_TERMS : [form.priceNote, ...PAY_TERMS], form.priceNote)}</select></label>
             <label class="f"><span>Загальна площа</span><div class="combo"><input class="field" data-k="areaValue" inputmode="decimal" value="${esc(form.areaValue)}" placeholder="160"><select class="field" data-k="areaUnit">${['м²', 'сот', 'га'].map((c) => `<option${c === form.areaUnit ? ' selected' : ''}>${c}</option>`).join('')}</select></div></label>
             <div class="f only-build">${areaInp('livingArea', 'livingUnit', 'Житлова площа', '95')}</div>

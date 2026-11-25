@@ -219,6 +219,8 @@ export const store = {
 };
 
 /* ── card ── */
+/* Значки програм фінансування (єОселя, Іпотека, ВПО), які менеджер відмітив в адмінці. */
+export const finBadges = (p) => { const n = (S.financePrograms || []).map((x) => (Array.isArray(x) ? x[0] : x)).filter((x) => Array.isArray(p.finance) && p.finance.includes(x)); return n.length && !p.sold ? `<div class="fin-badges">${n.map((x) => `<span>${esc(x)}</span>`).join('')}</div>` : ''; };
 export const shortPurpose = (s) => (s.match(/\(([^)]+)\)/)?.[1] || s.split(' ').slice(0, 2).join(' '));
 export function cardHTML(p, i = 0) {
   const img = p.images[0];
@@ -236,6 +238,7 @@ export function cardHTML(p, i = 0) {
     </div>
     <div class="pcard-body">
       ${priceHTML(p)}
+      ${finBadges(p)}
       <h3>${esc(p.title)}</h3>
       ${p.location ? `<div class="loc">${I.pin}<span>${esc(p.location)}</span></div>` : ''}
       ${specs ? `<div class="specs">${specs}</div>` : ''}
@@ -304,7 +307,7 @@ export function layout({ page = '', overDark = false } = {}) {
   });
 
   // Реклама для власників: вікно при відкритті і банер унизу (assets/promo.js).
-  if (S.promo !== false) import('./promo.js?v=20261133').then((m) => m.promo()).catch((e) => console.error(e));
+  if (S.promo !== false) import('./promo.js?v=20261134').then((m) => m.promo()).catch((e) => console.error(e));
 }
 
 const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .05 }) : null;
