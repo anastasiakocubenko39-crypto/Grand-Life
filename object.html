@@ -37,6 +37,8 @@ function render() {
   const imgs = p.images;
   const t = TYPE[p.type];
   const isLand = p.type === 'Ділянка';
+  // Програми фінансування, які менеджер відмітив для цього об’єкта (порядок — як у config.js)
+  const progs = (S.financePrograms || []).filter(([n]) => Array.isArray(p?.finance) && p.finance.includes(n));
   const perM2 = p.priceValue && p.areaValue && p.type !== 'Оренда' ? (p.areaUnit === 'м²' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за м²` : p.areaUnit === 'сот' ? `${p.currency}${fmt(p.priceValue / p.areaValue)} за сотку` : '') : '';
   const gal = imgs.length
     ? `<div class="gallery${imgs.length === 1 ? ' one' : imgs.length === 2 ? ' two' : ''}">${imgs.slice(0, 3).map((src, i) => `<button data-i="${i}" aria-label="Відкрити фото ${i + 1}"><img src="${esc(src)}" alt="${esc(p.title)} — фото ${i + 1}"${i ? ' loading="lazy"' : ''}>${i === 2 && imgs.length > 3 ? `<span class="more">+${imgs.length - 3} фото</span>` : ''}${i === 0 && imgs.length > 1 ? `<span class="pcount count-m">${I.photo}${imgs.length}</span>` : ''}</button>`).join('')}</div>`
@@ -70,8 +72,6 @@ function render() {
   const paras = String(p.description || '').split(/\n{2,}/).map((x) => x.trim()).filter(Boolean);
   const mapQ = encodeURIComponent([p.address, p.location].filter(Boolean).join(', '));
   const phone = S.phones?.[0];
-  // Програми фінансування, які менеджер відмітив для цього об’єкта (порядок — як у config.js)
-  const progs = (S.financePrograms || []).filter(([n]) => Array.isArray(p?.finance) && p.finance.includes(n));
   const msg = encodeURIComponent(`Добрий день! Цікавить об’єкт «${p.title}» (${location.href})`);
 
   root.innerHTML = `
